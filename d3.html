@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FreeFlight Wx</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="http://freeflightwx.com/acthpa/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.1.0/js/bootstrap-toggle.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Bootstrap -->
+    <link href="http://freeflightwx.com/acthpa/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.1.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link id="bsdp-css" href="http://freeflightwx.com/acthpa/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    
+<script type="application/javascript">
+    var myVar;
+    var count;
+    function stopRefresh() {
+        clearInterval(myVar);
+    }
+    function startRefresh() {
+        myVar = setInterval(function(){ updateImage() }, 3000);
+        count = 5;
+    }
+    function updateImage() {
+        var image = document.getElementById("graph");
+        image.src = 'http://freeflightwx.com/acthpa/springhill/windgraph.php?time=600&window=600&width=780&height=500&max=0&min=0&bol=0&markers=1&error=1&average=0&point=3&timeDisplay=true&rand=' + Math.random();
+        count--;
+        if(count <= 0){
+            toggleOff();
+        }
+    }
+    function toggleOff() {
+        $('#toggle').prop('checked', false).change()
+    }
+    window.onload = function() {
+        startRefresh();
+    }
+   
+    function GetCurrentPageName() {
+        //method to get Current page name from url.
+        var PageURL = document.location.href;
+        var PageName = PageURL.substring(PageURL.lastIndexOf('/') + 1);
+        return PageName.toLowerCase() ;
+    }
+    
+    function pad(num){
+        return ('0'+num).slice(-2);
+        
+    }
+    $(document).ready(function(){
+        var CurrPage = GetCurrentPageName();
+        switch(CurrPage){
+            case 'index.php':
+                $('#li_index').addClass('active') ;
+                break;
+            case '15mins.php':
+                $('#li_15mins').addClass('active') ;
+                break;
+            case '1hour.php':
+                $('#li_1hour').addClass('active') ;
+                break;
+            case '4hours.php':
+                $('#li_4hours').addClass('active') ;
+                break;
+            case '12hours.php':
+                $('#li_12hours').addClass('active') ;
+                break;
+            case 'day.php':
+                $('#li_day').addClass('active') ;
+                break;
+            case 'table.php?h=1':
+                $('#table').addClass('active') ;
+                break;
+        }
+        
+         $('#toggle').change(function(){
+            if($('#toggle').is(':checked')) {
+                updateImage();
+                startRefresh();
+            }
+            else {
+                stopRefresh();
+            }
+        });
+
+        const springHill = {
+          name: 'Spring Hill',
+          timezone: 'Australia/Sydney',
+          speedLowKt: 13,
+          speedOnKt: 13,
+          speedMarginalKt: 22,
+          speedMaxKt: 150, // max recordable wind speed to cancel out electrical interference
+          dirOnDeg: 280,
+          dirWidthDeg: 45,
+          altitudeFt: 2870,
+          dirAdjust: 0
+        };
+          
+
+        // Copyright 2021 Observable, Inc.
+        // Released under the ISC license.
+        // https://observablehq.com/@d3/line-chart
+        function WindStrengthGraph(data, {
+          site = springHill,
+          x = ([x]) => x, // given d in data, returns the (temporal) x-value
+          y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
+          defined, // for gaps in data
+          curve = d3.curveLinear, // method of interpolation between points
+          marginTop = 20, // top margin, in pixels
+          marginRight = 30, // right margin, in pixels
+          marginBottom = 30, // bottom margin, in pixels
+          marginLeft = 40, // left margin, in pixels
+          width = 640, // outer width, in pixels
+          height = 400, // outer height, in pixels
+          xDomain, // [xmin, xmax]
+          xRange = [marginLeft, width - marginRight], // [left, right]
+          yType = d3.scaleLinear, // the y-scale type
+          yDomain, // [ymin, ymax]
+          yRange = [height - marginBottom, marginTop], // [bottom, top]
+          yFormat, // a format specifier string for the y-axis
+          yLabel, // a label for the y-axis
+          color = "currentColor", // stroke color of line
+          strokeLinecap = "round", // stroke line cap of the line
+          strokeLinejoin = "round", // stroke line join of the line
+          strokeWidth = 1.5, // stroke width of line, in pixels
+          strokeOpacity = 1, // stroke opacity of line
+        } = {}) {
+          // Compute values.
+          const X = d3.map(data, x);
+          const Y = d3.map(data, y);
+          const I = d3.range(X.length);
+          if (defined === undefined) defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
+          const D = d3.map(data, defined);
+
+          // Compute default domains.
+          if (xDomain === undefined) xDomain = d3.extent(X);
+          if (yDomain === undefined) yDomain = [0, site.speedMaxKt];
+
+          // Construct scales and axes.
+          const xScale = d3.scaleTime(xDomain, xRange);
+          const yScale = yType(yDomain, yRange);
+          const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
+          const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+
+          // Construct a line generator.
+          const line = d3.line()
+              .defined(i => D[i])
+              .curve(curve)
+              .x(i => xScale(X[i]))
+              .y(i => yScale(Y[i]));
+
+          const svg = d3.create("svg")
+              .attr("width", width)
+              .attr("height", height)
+              .attr("viewBox", [0, 0, width, height])
+              .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+          svg.append("g")
+              .attr("transform", `translate(0,${height - marginBottom})`)
+              .call(xAxis);
+
+          svg.append("g")
+              .attr("transform", `translate(${marginLeft},0)`)
+              .call(yAxis)
+              .call(g => g.select(".domain").remove())
+              .call(g => g.selectAll(".tick line").clone()
+                  .attr("x2", width - marginLeft - marginRight)
+                  .attr("stroke-opacity", 0.1))
+              .call(g => g.append("text")
+                  .attr("x", -marginLeft)
+                  .attr("y", 10)
+                  .attr("fill", "currentColor")
+                  .attr("text-anchor", "start")
+                  .text(yLabel));
+
+          svg.append("path")
+              .attr("fill", "none")
+              .attr("stroke", color)
+              .attr("stroke-width", strokeWidth)
+              .attr("stroke-linecap", strokeLinecap)
+              .attr("stroke-linejoin", strokeLinejoin)
+              .attr("stroke-opacity", strokeOpacity)
+              .attr("d", line(I));
+
+          return svg.node();
+        }
+
+        d3.json("https://cors-anywhere.herokuapp.com/http://freeflightwx.com/acthpa/springhill/rawjson2.php?r=600").then(function(data) {
+            console.log(data[0]);
+            // const times = d3.map(data, d => d.time);
+            // const windSpeedsMph = d3.map(data, d => d.Windspeedmph);
+            // const windSpeedsMphMax = d3.map(data, d => d.WindspeedmphMax);
+            // const windSpeedsMphMin = d3.map(data, d => d.WindspeedmphMin);
+            // const windDirections = d3.map(data, d.Winddir);
+
+            chart = WindStrengthGraph(data, {
+              x: d => d3.timeParse("%Y-%m-%d %H:%M:%S")(d.time),
+              y: d => parseInt(d.Windspeedmph),
+              yLabel: "Wind Speed in Knots",
+              width: 800,
+              height: 500,
+              color: "green"
+            });
+
+            d3.select("#graph")
+              .node()
+              .appendChild(chart);
+        });
+    });
+</script>
+<div class="container">
+<!-- Static navbar -->
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../">Home</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li id="li_index"><a href="index.php">Current</a></li>
+                <!--<li id="li_15mins"><a href="15mins.php">15 Mins</a></li>-->
+                <li id="li_1hour"><a href="1hour.php">1 Hour</a></li>
+                <li id="li_4hours"><a href="4hours.php">4 Hours</a></li>
+                <li id="li_12hours"><a href="12hours.php">12 Hours</a></li>
+                <li id="li_day"><a href="day.php">Day</a></li>
+                <li id="li_table"><a href="table.php?h=24">Table</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div><!--/.container-fluid -->
+</nav>
+<h3>Spring Hill Weather Station</h3>
+</div>
+<!--
+<div class="container">
+    <div class="checkbox">
+        <label>
+            <input id="toggle" type="checkbox" checked data-toggle="toggle" data-size="mini" data-onstyle="info" data-offstyle="warning">
+            Auto refresh (every 3 seconds)
+        </label>
+    </div>
+</div>
+-->
+<div class="container" id="graph">
+  
+</div>
+<div class="container" id="table">
+    
+</div>
+</body>
+</html>
+
