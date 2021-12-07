@@ -25,77 +25,7 @@
 <body>
     
 <script type="application/javascript">
-    var myVar;
-    var count;
-    function stopRefresh() {
-        clearInterval(myVar);
-    }
-    function startRefresh() {
-        myVar = setInterval(function(){ updateImage() }, 3000);
-        count = 5;
-    }
-    function updateImage() {
-        var image = document.getElementById("graph");
-        image.src = 'http://freeflightwx.com/acthpa/springhill/windgraph.php?time=600&window=600&width=780&height=500&max=0&min=0&bol=0&markers=1&error=1&average=0&point=3&timeDisplay=true&rand=' + Math.random();
-        count--;
-        if(count <= 0){
-            toggleOff();
-        }
-    }
-    function toggleOff() {
-        $('#toggle').prop('checked', false).change()
-    }
-    window.onload = function() {
-        startRefresh();
-    }
-   
-    function GetCurrentPageName() {
-        //method to get Current page name from url.
-        var PageURL = document.location.href;
-        var PageName = PageURL.substring(PageURL.lastIndexOf('/') + 1);
-        return PageName.toLowerCase() ;
-    }
-    
-    function pad(num){
-        return ('0'+num).slice(-2);
-        
-    }
     $(document).ready(function(){
-        var CurrPage = GetCurrentPageName();
-        switch(CurrPage){
-            case 'index.php':
-                $('#li_index').addClass('active') ;
-                break;
-            case '15mins.php':
-                $('#li_15mins').addClass('active') ;
-                break;
-            case '1hour.php':
-                $('#li_1hour').addClass('active') ;
-                break;
-            case '4hours.php':
-                $('#li_4hours').addClass('active') ;
-                break;
-            case '12hours.php':
-                $('#li_12hours').addClass('active') ;
-                break;
-            case 'day.php':
-                $('#li_day').addClass('active') ;
-                break;
-            case 'table.php?h=1':
-                $('#table').addClass('active') ;
-                break;
-        }
-        
-         $('#toggle').change(function(){
-            if($('#toggle').is(':checked')) {
-                updateImage();
-                startRefresh();
-            }
-            else {
-                stopRefresh();
-            }
-        });
-
         // Theme colours
         const colorDanger      = '#ff0000';
         const colorDangerMid   = '#ff6969';
@@ -110,7 +40,7 @@
         const colorLowMid      = '#b9e2f4';
         const colorLowBg       = '#e9f5fb';
         const colorAvg         = '#a56106';
-        const colorFloor       = '#5381f2';
+        const colorLull        = '#5381f2';
         const colorPeak        = '#ff7de3';
         const colorDirOn       = '#008100';
         const colorDirOff      = '#8c4521';
@@ -133,26 +63,78 @@
           dirAdjust:        0
         };
 
+        // The time between samples, in seconds
+        const sampleIntervalSecs = 11.25;
+        const refreshIntervalSecs = sampleIntervalSecs;
+        
         // Utility functions
         function mphToKt(mph) { return mph * 0.8689758; }
         function mphToKmh(mph) { return mph * 1.609344; }
         function clamp(x, l, h) { return Math.max(l, Math.min(h, x)); }
+        function secondsToSamples(sec) { return Math.floor(sec / sampleIntervalSecs); }
+        function samplesToSeconds(n) { return n * sampleIntervalSecs; }
 
-        function weightedMovingAverage(data, n) {
-          totals = [];
-          data.forEach((x, i, a) => {
-              const prev = i > 0 ? totals[i - 1] : 0;
-              const dropoff = i >= n ? a[i - n] : 0;
-              var total = prev + x - dropoff;
-              totals.push(total);
+        // The largest period to update in one go
+        const maxUpdateSeconds = 3600; // 1 hour
+        const maxUpdateSamples = secondsToSamples(maxUpdateSeconds);
+
+        function weightedMovingAverage(xs_, n_) {
+          const n = n_;
+          const xs = [...xs_];
+          const denominator = n * (n + 1) / 2;
+
+          // Construct an array of moving totals over the window
+          var totals = [];
+          xs.forEach((x, i, a) => {
+              // To get a moving average for the first 'n' values we assume that the previous 'n' values were equal to the first value
+              if (i == 0)
+                  totals.push(n * x);
+              else {
+                  const prev = totals[i - 1];
+                  const dropoff = a[i - Math.min(i, n)];
+                  const total = prev + x - dropoff;
+                  totals.push(total);
+              }
             });
-          console.log(totals);
-          return totals;
+
+          // Construct an array of moving numerators over the window
+          var numerators = [];
+          xs.forEach((x, i, a) => {
+              if (i == 0) numerators.push(denominator * x);
+              else {
+                  const prevNumerator = numerators[i - 1];
+                  const prevTotal = totals[i - 1];
+                  const numerator = prevNumerator + n * x - prevTotal;
+                  numerators.push(numerator);
+              }
+            });
+
+          const wmas = numerators.map((numerator, i) => {
+              return numerator / denominator;
+            });
+
+          return wmas;
         }
 
-        // Copyright 2021 Observable, Inc.
-        // Released under the ISC license.
-        // https://observablehq.com/@d3/line-chart
+        function recentPeak(xs, n) { return recentSomething(Math.max, xs, n); }
+        function recentLull(xs, n) { return recentSomething(Math.min, xs, n); }
+
+        function recentSomething(fn, xs_, n_) {
+          const n = n_;
+          const xs = [...xs_];
+
+          // This is O(n * length(xs)), so not terribly efficient
+          var results = [];
+          xs.forEach((x, i, a) => {
+              var result = x;
+              for (let j = Math.max(0, i - n); j < i; j++) {
+                  result = fn(result, a[j]);
+              }
+              results.push(result);
+          });
+          return results;
+        }
+
         function WindStrengthGraph(data, {
           site = springHill,
           time,
@@ -160,7 +142,7 @@
           windMinMph,
           windMaxMph,
           defined, // for gaps in data
-          curve = d3.curveBumpX, // method of interpolation between points
+          curve = d3.curveLinear, // method of interpolation between points
           marginTop = 20, // top margin, in pixels
           marginRight = 40, // right margin, in pixels
           marginBottom = 30, // bottom margin, in pixels
@@ -175,6 +157,10 @@
           strokeLinejoin = "round", // stroke line join of the line
           strokeWidth = 1.5, // stroke width of line, in pixels
           strokeOpacity = 1, // stroke opacity of line
+          movingAverageSmoothingSecs = 112.5, // Smooth over an 11.25 second period (10 samples)
+          movingAverageSmoothingN = secondsToSamples(movingAverageSmoothingSecs), // how many values to smooth the average line over
+          recentSecs = 600, // recent is 10 minutes
+          recentN = secondsToSamples(recentSecs)
         } = {}) {
           // Compute values.
           const Time = d3.map(data, time);
@@ -183,7 +169,9 @@
           const WindMaxMph = d3.map(data, windMaxMph);
           const I = d3.range(Time.length);
 
-          const Avg = weightedMovingAverage(data, 10);
+          const AvgMph = weightedMovingAverage(WindMph, movingAverageSmoothingN);
+          const RecentPeakMph = recentPeak(WindMaxMph, recentN);
+          const RecentLullMph = recentLull(WindMinMph, recentN);
 
           const widthGraph = width - marginRight - marginLeft;
           const heightGraph = height - marginTop - marginBottom;
@@ -248,203 +236,231 @@
                   .attr("font-weight", "bold")
                   .text("kmh"));
 
-         // Define the low zone clip path
-         svg.append("clipPath")
-             .attr("id", "clip-low")
-             .append("rect")
-                 .attr("x", marginLeft)
-                 .attr("y", mphScale(site.speedLowMph))
-                 .attr("width", widthGraph)
-                 .attr("height", mphScale(0) - mphScale(site.speedLowMph));
+           // Define the low zone clip path
+           svg.append("clipPath")
+               .attr("id", "clip-low")
+               .append("rect")
+                   .attr("x", marginLeft)
+                   .attr("y", mphScale(site.speedLowMph))
+                   .attr("width", widthGraph)
+                   .attr("height", mphScale(0) - mphScale(site.speedLowMph));
 
-         // Define the on zone clip path
-         svg.append("clipPath")
-             .attr("id", "clip-on")
-             .append("rect")
-                 .attr("x", marginLeft)
-                 .attr("y", mphScale(site.speedOnMph))
-                 .attr("width", widthGraph)
-                 .attr("height", mphScale(site.speedLowMph) - mphScale(site.speedOnMph));
+           // Define the on zone clip path
+           svg.append("clipPath")
+               .attr("id", "clip-on")
+               .append("rect")
+                   .attr("x", marginLeft)
+                   .attr("y", mphScale(site.speedOnMph))
+                   .attr("width", widthGraph)
+                   .attr("height", mphScale(site.speedLowMph) - mphScale(site.speedOnMph));
 
-         // Define the marginal zone clip path
-         svg.append("clipPath")
-             .attr("id", "clip-marginal")
-             .append("rect")
-                 .attr("x", marginLeft)
-                 .attr("y", mphScale(site.speedMarginalMph))
-                 .attr("width", widthGraph)
-                 .attr("height", mphScale(site.speedOnMph) - mphScale(site.speedMarginalMph));
+           // Define the marginal zone clip path
+           svg.append("clipPath")
+               .attr("id", "clip-marginal")
+               .append("rect")
+                   .attr("x", marginLeft)
+                   .attr("y", mphScale(site.speedMarginalMph))
+                   .attr("width", widthGraph)
+                   .attr("height", mphScale(site.speedOnMph) - mphScale(site.speedMarginalMph));
 
-         // Define the danger zone clip path
-         svg.append("clipPath")
-             .attr("id", "clip-danger")
-             .append("rect")
-                 .attr("x", marginLeft)
-                 .attr("y", mphScale(graphMaxMph))
-                 .attr("width", widthGraph)
-                 .attr("height", mphScale(site.speedMarginalMph) - mphScale(graphMaxMph));
+           // Define the danger zone clip path
+           svg.append("clipPath")
+               .attr("id", "clip-danger")
+               .append("rect")
+                   .attr("x", marginLeft)
+                   .attr("y", mphScale(graphMaxMph))
+                   .attr("width", widthGraph)
+                   .attr("height", mphScale(site.speedMarginalMph) - mphScale(graphMaxMph));
 
-         // Draw the danger zone background
-         svg.append("rect")
-             .attr("fill", colorDangerBg)
-             .attr("clip-path", "url(#clip-danger)")
-             .attr("x", 0)
-             .attr("y", 0)
-             .attr("width", width)
-             .attr("height", height);
+           // Draw the danger zone background
+           svg.append("rect")
+               .attr("fill", colorDangerBg)
+               .attr("clip-path", "url(#clip-danger)")
+               .attr("x", 0)
+               .attr("y", 0)
+               .attr("width", width)
+               .attr("height", height);
 
-         // Draw the marginal zone background
-         svg.append("rect")
-             .attr("fill", colorMarginalBg)
-             .attr("clip-path", "url(#clip-marginal)")
-             .attr("x", 0)
-             .attr("y", 0)
-             .attr("width", width)
-             .attr("height", height);
+           // Draw the marginal zone background
+           svg.append("rect")
+               .attr("fill", colorMarginalBg)
+               .attr("clip-path", "url(#clip-marginal)")
+               .attr("x", 0)
+               .attr("y", 0)
+               .attr("width", width)
+               .attr("height", height);
 
-         // Draw the on zone background
-         svg.append("rect")
-             .attr("fill", colorOnBg)
-             .attr("clip-path", "url(#clip-on)")
-             .attr("x", 0)
-             .attr("y", 0)
-             .attr("width", width)
-             .attr("height", height);
+           // Draw the on zone background
+           svg.append("rect")
+               .attr("fill", colorOnBg)
+               .attr("clip-path", "url(#clip-on)")
+               .attr("x", 0)
+               .attr("y", 0)
+               .attr("width", width)
+               .attr("height", height);
 
-         // Draw the low zone background
-         svg.append("rect")
-             .attr("fill", colorLowBg)
-             .attr("clip-path", "url(#clip-low)")
-             .attr("x", 0)
-             .attr("y", 0)
-             .attr("width", width)
-             .attr("height", height);
+           // Draw the low zone background
+           svg.append("rect")
+               .attr("fill", colorLowBg)
+               .attr("clip-path", "url(#clip-low)")
+               .attr("x", 0)
+               .attr("y", 0)
+               .attr("width", width)
+               .attr("height", height);
 
-         // Define the current wind band (between each sample's low and high)
-         const windArea = d3.area()
-             .curve(curve)
-             .x(i => xScale(Time[i]))
-             .y0(i => mphScale(WindMinMph[i]))
-             .y1(i => mphScale(WindMaxMph[i]));
+           // Define the current wind band (between each sample's low and high)
+           const windArea = d3.area()
+               .curve(curve)
+               .x(i => xScale(Time[i]))
+               .y0(i => mphScale(WindMinMph[i]))
+               .y1(i => mphScale(WindMaxMph[i]));
 
-         // Define the area below the current wind band
-         const windAreaBelow = d3.area()
-             .curve(curve)
-             .x(i => xScale(Time[i]))
-             .y0(mphScale(0))
-             .y1(i => mphScale(WindMinMph[i]));
+           // Define the area below the current wind band
+           const windAreaBelow = d3.area()
+               .curve(curve)
+               .x(i => xScale(Time[i]))
+               .y0(mphScale(0))
+               .y1(i => mphScale(WindMinMph[i]));
 
-         // Draw the low zone wind below the band
-         svg.append("path")
-             .attr("fill", colorLowMid)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-low)")
-             .attr("d", windAreaBelow(I));
+           // Draw the low zone wind below the band
+           svg.append("path")
+               .attr("fill", colorLowMid)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-low)")
+               .attr("d", windAreaBelow(I));
 
-         // Draw the low zone wind band
-         svg.append("path")
-             .attr("fill", colorLow)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-low)")
-             .attr("d", windArea(I));
+           // Draw the low zone wind band
+           svg.append("path")
+               .attr("fill", colorLow)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-low)")
+               .attr("d", windArea(I));
 
-         // Draw the on zone wind below the band
-         svg.append("path")
-             .attr("fill", colorOnMid)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-on)")
-             .attr("d", windAreaBelow(I));
+           // Draw the on zone wind below the band
+           svg.append("path")
+               .attr("fill", colorOnMid)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-on)")
+               .attr("d", windAreaBelow(I));
 
-         // Draw the on zone wind band
-         svg.append("path")
-             .attr("fill", colorOn)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-on)")
-             .attr("d", windArea(I));
+           // Draw the on zone wind band
+           svg.append("path")
+               .attr("fill", colorOn)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-on)")
+               .attr("d", windArea(I));
 
-         // Draw the marginal zone wind below the band
-         svg.append("path")
-             .attr("fill", colorMarginalMid)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-marginal)")
-             .attr("d", windAreaBelow(I));
+           // Draw the marginal zone wind below the band
+           svg.append("path")
+               .attr("fill", colorMarginalMid)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-marginal)")
+               .attr("d", windAreaBelow(I));
 
-         // Draw the marginal zone wind band
-         svg.append("path")
-             .attr("fill", colorMarginal)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-marginal)")
-             .attr("d", windArea(I));
+           // Draw the marginal zone wind band
+           svg.append("path")
+               .attr("fill", colorMarginal)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-marginal)")
+               .attr("d", windArea(I));
 
-         // Draw the danger zone wind below the band
+           // Draw the danger zone wind below the band
 
-         svg.append("path")
-             .attr("fill", colorDangerMid)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-danger)")
-             .attr("d", windAreaBelow(I));
+           svg.append("path")
+               .attr("fill", colorDangerMid)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-danger)")
+               .attr("d", windAreaBelow(I));
 
-         // Draw the danger zone wind band
-         svg.append("path")
-             .attr("fill", colorDanger)
-             .attr("stroke", "none")
-             .attr("clip-path", "url(#clip-danger)")
-             .attr("d", windArea(I));
+           // Draw the danger zone wind band
+           svg.append("path")
+               .attr("fill", colorDanger)
+               .attr("stroke", "none")
+               .attr("clip-path", "url(#clip-danger)")
+               .attr("d", windArea(I));
 
-         // Draw the weighted moving average of averages
-         const avgLine = d3.line()
-             .curve(curve)
-             .x(i => xScale(Time[i]))
-             .y(i => mphScale(Avg[i]));
-         svg.append("path")
-             .attr("fill", "none")
-             .attr("stroke", colorAvg)
-             .attr("stroke-width", strokeWidth)
-             .attr("stroke-linecap", strokeLinecap)
-             .attr("stroke-linejoin", strokeLinejoin)
-             .attr("stroke-opacity", strokeOpacity)
-             .attr("stroke-miterlimit", 1)
-             .attr("d", avgLine(I));
-          // Draw the wind line
-          // const windLine = d3.line()
-          //     .curve(curve)
-          //     .curve(curve)
-          //     .x(i => xScale(Time[i]))
-          //     .y(i => mphScale(WindMph[i]));
-          // svg.append("path")
-          //     .attr("fill", "none")
-          //     .attr("stroke", colorWorm)
-          //     .attr("stroke-width", strokeWidth)
-          //     .attr("stroke-linecap", strokeLinecap)
-          //     .attr("stroke-linejoin", strokeLinejoin)
-          //     .attr("stroke-opacity", strokeOpacity)
-          //     .attr("stroke-miterlimit", 1)
-          //     .attr("d", windLine(I));
+           // Draw the weighted moving average of averages
+           const avgLine = d3.line()
+               .curve(curve)
+               .x(i => xScale(Time[i]))
+               .y(i => mphScale(AvgMph[i]));
+           svg.append("path")
+               .attr("fill", "none")
+               .attr("stroke", colorAvg)
+               .attr("stroke-width", strokeWidth)
+               .attr("stroke-linecap", strokeLinecap)
+               .attr("stroke-linejoin", strokeLinejoin)
+               .attr("stroke-opacity", strokeOpacity)
+               .attr("stroke-miterlimit", 1)
+               .attr("d", avgLine(I));
 
-          return svg.node();
+           // Draw the recent peak line
+           const recentPeakLine = d3.line()
+               .curve(curve)
+               .x(i => xScale(Time[i]))
+               .y(i => mphScale(RecentPeakMph[i]));
+           svg.append("path")
+               .attr("fill", "none")
+               .attr("stroke", colorPeak)
+               .attr("stroke-width", strokeWidth)
+               .attr("stroke-linecap", strokeLinecap)
+               .attr("stroke-linejoin", strokeLinejoin)
+               .attr("stroke-opacity", strokeOpacity)
+               .attr("stroke-miterlimit", 1)
+               .attr("d", recentPeakLine(I));
+
+           // Draw the recent lull line
+           const recentLullLine = d3.line()
+               .curve(curve)
+               .x(i => xScale(Time[i]))
+               .y(i => mphScale(RecentLullMph[i]));
+           svg.append("path")
+               .attr("fill", "none")
+               .attr("stroke", colorLull)
+               .attr("stroke-width", strokeWidth)
+               .attr("stroke-linecap", strokeLinecap)
+               .attr("stroke-linejoin", strokeLinejoin)
+               .attr("stroke-opacity", strokeOpacity)
+               .attr("stroke-miterlimit", 1)
+               .attr("d", recentLullLine(I));
+
+           return svg.node();
         }
 
-        d3.json("https://cors-anywhere.herokuapp.com/http://freeflightwx.com/acthpa/springhill/rawjson2.php?r=300").then(function(data) {
-            console.log(data[0]);
-            // const times = d3.map(data, d => d.time);
-            // const windSpeedsMph = d3.map(data, d => d.Windspeedmph);
-            // const windSpeedsMphMax = d3.map(data, d => d.WindspeedmphMax);
-            // const windSpeedsMphMin = d3.map(data, d => d.WindspeedmphMin);
-            // const windDirections = d3.map(data, d.Winddir);
+        var data = [];
+        var lastUpdateSec = 0;
 
-            chart = WindStrengthGraph(data, {
-              time: d => d3.timeParse("%Y-%m-%d %H:%M:%S")(d.time),
-              windMph: d => parseInt(d.Windspeedmph),
-              windMinMph: d => parseInt(d.WindspeedmphMin),
-              windMaxMph: d => parseInt(d.WindspeedmphMax),
-              width: 1024,
-              height: 400,
+        function poll() {
+            const newUpdateSec = Date.now();
+            const secondsToRetrieve = Math.min(maxUpdateSeconds, newUpdateSec - lastUpdateSec)
+            const samplesToRetrieve = secondsToSamples(secondsToRetrieve);
+
+            d3.json("https://cors-anywhere.herokuapp.com/http://freeflightwx.com/acthpa/springhill/rawjson2.php?r=" + samplesToRetrieve).then(function(newData) {
+                lastUpdateSec = newUpdateSec;
+
+                // The data is most-recent-first, but to avoid confusing us we reverse it here so it's in time order
+                newData = newData.reverse();
+                console.log(newData);
+                data.push(...newData);
+
+                chart = WindStrengthGraph(data, {
+                  time: d => d3.timeParse("%Y-%m-%d %H:%M:%S")(d.time),
+                  windMph: d => parseInt(d.Windspeedmph),
+                  windMinMph: d => parseInt(d.WindspeedmphMin),
+                  windMaxMph: d => parseInt(d.WindspeedmphMax),
+                  width: 1024,
+                  height: 400,
+                });
+
+                d3.select("#graph")
+                  .node()
+                  .appendChild(chart);
             });
 
-            d3.select("#graph")
-              .node()
-              .appendChild(chart);
-        });
+            // Ask for updated data soon
+            //setTimeout(poll, refreshIntervalSecs);
+        }
+        poll();
     });
 </script>
 <div class="container">
