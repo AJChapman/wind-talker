@@ -37,13 +37,14 @@ const springHill = {
 
 // The time between samples, in seconds
 const sampleIntervalSecs = 11.25;
-const refreshIntervalSecs = 3;
+const refreshIntervalSecs = sampleIntervalSecs;
 
 // Utility functions
 function mphToKt(mph) { return mph * 0.8689758; }
 function mphToKmh(mph) { return mph * 1.609344; }
 function clamp(x, l, h) { return Math.max(l, Math.min(h, x)); }
 function secondsToSamples(sec) { return Math.floor(sec / sampleIntervalSecs); }
+function samplesToMs(samples) { return secondsToMs(sampleIntervalSecs); }
 function msToSamples(ms) { return Math.floor(ms / secondsToMs(sampleIntervalSecs)); }
 function samplesToSeconds(n) { return n * sampleIntervalSecs; }
 function secondsToMs(sec) { return sec * 1000; }
@@ -59,7 +60,7 @@ function weightedMovingAverage(xs_, n_) {
   const denominator = n * (n + 1) / 2;
 
   // Construct an array of moving totals over the window
-  var totals = [];
+  let totals = [];
   xs.forEach((x, i, a) => {
       // To get a moving average for the first 'n' values we assume that the previous 'n' values were equal to the first value
       if (i == 0)
@@ -73,7 +74,7 @@ function weightedMovingAverage(xs_, n_) {
     });
 
   // Construct an array of moving numerators over the window
-  var numerators = [];
+  let numerators = [];
   xs.forEach((x, i, a) => {
       if (i == 0) numerators.push(denominator * x);
       else {
@@ -96,7 +97,7 @@ function exponentialMovingAverage(xs_, alpha_) {
     const beta = 1.0 - alpha;
     xs = [...xs_];
 
-    var ema = [];
+    let ema = [];
     xs.forEach((x, i) => {
         ema.push(i == 0 ? x : alpha * x + beta * ema[i - 1]);
     });
@@ -111,9 +112,9 @@ function recentSomething(fn, xs_, n_) {
   const xs = [...xs_];
 
   // This is O(n * length(xs)), so not terribly efficient
-  var results = [];
+  let results = [];
   xs.forEach((x, i, a) => {
-      var result = x;
+      let result = x;
       for (let j = Math.max(0, i - n); j < i; j++) {
           result = fn(result, a[j]);
       }
@@ -424,6 +425,7 @@ function parseData(obj) {
 }
 
 function filterLatestMinutes(data, minutesToShow) {
+    if (data.length == 0) return data;
     const last = data[data.length - 1];
     const latestMs = last.time.getTime();
     const earliestMs = latestMs - minutesToMs(minutesToShow);
@@ -440,10 +442,14 @@ function formatHours(minutes) {
 }
 
 function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
-    var data = [];
-    var msLastUpdate = 0;
-    var minutesToShow = 60;
+    let data = [];
+    let msLastUpdate = 0;
+    let minutesToShow = 60;
     const graph = d3.select(graphId);
+    const minutesSlider = d3.select(minutesId).node();
+    let pollTimeout = null;
+    const refreshIntervalMs = secondsToMs(refreshIntervalSecs);
+    const uiUpdateIntervalMs = 300;
 
     function addData(newData) {
         // Concatenate and then sort and remove consecutive duplicates
@@ -452,6 +458,7 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
         data = newData.filter((x, i, a) => {
             return (i == 0) || (x.id != a[i - 1].id);
         });
+        console.log(data);
     }
 
     function oldestDataTime() { return data[0] ? data[0].time : new Date(); }
@@ -475,37 +482,46 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
         graph.node().append(svg);
     }
 
-    function poll() {
-        const msNewUpdate = Date.now();
-        const msDataAvailable = newestDataTime().getTime() - oldestDataTime().getTime();
-        const msToShow = minutesToMs(minutesToShow);
-        const msDataToRetrieve = msToShow > msDataAvailable ? msToShow : 0;
-        const msNewToRetrieve = msNewUpdate - msLastUpdate;
-        const msToRetrieve = Math.min(msToShow, msDataToRetrieve + msNewToRetrieve);
-        const samplesToRetrieve = Math.max(1, msToSamples(msToRetrieve));
-
-        console.log("Asking for " + samplesToRetrieve + " samples");
-        d3.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
-            msLastUpdate = msNewUpdate;
-
-            console.log(newData);
-            addData(d3.map(newData, parseData));
-
-            updateGraph();
-        });
-
-        // Ask for updated data soon
-        setTimeout(poll, secondsToMs(refreshIntervalSecs));
+    function pollSoon(delayMs) {
+        clearTimeout(pollTimeout);
+        pollTimeout = setTimeout(poll, delayMs);
     }
 
-    const minutesSlider = d3.select(minutesId).node();
-    console.log(minutesSlider);
+    function poll() {
+        pollTimeout = null;
+        const msNewUpdate = Date.now();
+        const msDataAvailable = newestDataTime().getTime() - oldestDataTime().getTime() + samplesToMs(2); // Add 2 samples to account for rounding
+        const msToShow = minutesToMs(minutesToShow);
+        console.log("msToShow: " + msToShow + ", msDataAvailable: " + msDataAvailable);
+        const msDataToRetrieve = msToShow > msDataAvailable ? msToShow : 0;
+        const msNewToRetrieve = msNewUpdate - msLastUpdate;
+        const msToRetrieve = Math.min(msToShow, msDataToRetrieve + msNewToRetrieve) + 1;
+        const samplesToRetrieve = msToSamples(msToRetrieve);
+
+        if (samplesToRetrieve > 0) {
+            console.log("Asking for " + samplesToRetrieve + " samples");
+            d3.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
+                msLastUpdate = msNewUpdate;
+
+                addData(d3.map(newData, parseData));
+
+                updateGraph();
+
+            });
+        }
+
+        // Ask for updated data soon
+        pollSoon(refreshIntervalMs);
+    }
+
     minutesSlider.oninput = function() {
         minutesToShow = this.value;
         d3.select('#minutesToShowLabel').text("Show " + formatHours(minutesToShow));
         console.log("Minutes to show changed to: " + minutesToShow);
         updateGraph();
+        pollSoon(uiUpdateIntervalMs);
     }
 
-    poll();
+    // Changing the minutes slider triggers a poll, so we do this to start
+    minutesSlider.oninput();
 }
