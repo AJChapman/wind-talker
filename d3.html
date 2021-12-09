@@ -27,7 +27,7 @@
     
 <script type="application/javascript">
     $(document).ready(function(){
-        windTalkerGraph(springHill, '#graph', "https://cors-anywhere.herokuapp.com/http://freeflightwx.com/acthpa/springhill/rawjson2.php");
+        windTalkerGraph(springHill, '#graph', '#minutesToShow', "https://cors-anywhere.herokuapp.com/http://freeflightwx.com/acthpa/springhill/rawjson2.php");
     });
 </script>
 <div class="container">
@@ -68,12 +68,12 @@
     </div>
 </div>
 -->
-<div class="container" id="graph">
-  
+<div class="controls" id="controls">
+    <label for="minutesToShow" id="minutesToShowLabel">Show minutes: </label>
+    <input type="range" min="5" max="1440" id="minutesToShow" style="direction: rtl;"/>
 </div>
-<div class="container" id="table">
-    
-</div>
+<div class="container" id="graph"></div>
+<div class="container" id="table"></div>
 </body>
 </html>
 

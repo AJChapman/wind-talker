@@ -37,18 +37,20 @@ const springHill = {
 
 // The time between samples, in seconds
 const sampleIntervalSecs = 11.25;
-const refreshIntervalSecs = sampleIntervalSecs;
+const refreshIntervalSecs = 3;
 
 // Utility functions
 function mphToKt(mph) { return mph * 0.8689758; }
 function mphToKmh(mph) { return mph * 1.609344; }
 function clamp(x, l, h) { return Math.max(l, Math.min(h, x)); }
 function secondsToSamples(sec) { return Math.floor(sec / sampleIntervalSecs); }
-function msToSamples(ms) { return Math.floor(ms / (sampleIntervalSecs * 1000)); }
+function msToSamples(ms) { return Math.floor(ms / secondsToMs(sampleIntervalSecs)); }
 function samplesToSeconds(n) { return n * sampleIntervalSecs; }
+function secondsToMs(sec) { return sec * 1000; }
+function minutesToMs(min) { return min * 60000; }
 
 // The largest period to update in one go
-const maxUpdateSeconds = 3600; // 1 hour
+const maxUpdateSeconds = 24 * 60 * 60; // 24 hours
 const maxUpdateSamples = secondsToSamples(maxUpdateSeconds);
 
 function weightedMovingAverage(xs_, n_) {
@@ -98,7 +100,6 @@ function exponentialMovingAverage(xs_, alpha_) {
     xs.forEach((x, i) => {
         ema.push(i == 0 ? x : alpha * x + beta * ema[i - 1]);
     });
-    console.log(ema);
     return ema;
 }
 
@@ -413,42 +414,98 @@ function graphWindStrength(site, data, {
    return svg.node();
 }
 
-function windTalkerGraph(site, eltId, rawjsonurl) {
+function parseData(obj) {
+    obj.id = parseInt(obj.id);
+    obj.time = d3.timeParse("%Y-%m-%d %H:%M:%S")(obj.time);
+    obj.Windspeedmph = parseInt(obj.WindSpeedmph);
+    obj.windspeedmphMin = parseInt(obj.WindspeedmphMin);
+    obj.WindspeedmphMax = parseInt(obj.WindspeedmphMax);
+    return obj;
+}
+
+function filterLatestMinutes(data, minutesToShow) {
+    const last = data[data.length - 1];
+    const latestMs = last.time.getTime();
+    const earliestMs = latestMs - minutesToMs(minutesToShow);
+    return d3.filter(data, d => d.time.getTime() >= earliestMs);
+}
+
+function formatHours(minutes) {
+    const minutesNumber = minutes % 60;
+    const minutesText = minutesNumber == 0 ? "" : (minutesNumber + (minutesNumber == 1 ? " minute" : " minutes"));
+    if (minutes < 60) return minutesText;
+    const hourNumber = Math.floor(minutes / 60);
+    if (hourNumber == 1) return hourNumber + " hour" + (minutesText == "" ? "" : ", " + minutesText);
+    return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText);
+}
+
+function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
     var data = [];
-    var lastUpdateMs = 0;
+    var msLastUpdate = 0;
+    var minutesToShow = 60;
+    const graph = d3.select(graphId);
+
+    function addData(newData) {
+        // Concatenate and then sort and remove consecutive duplicates
+        newData = data.concat(newData);
+        newData.sort(function(a, b) { return a.id - b.id; });
+        data = newData.filter((x, i, a) => {
+            return (i == 0) || (x.id != a[i - 1].id);
+        });
+    }
+
+    function oldestDataTime() { return data[0] ? data[0].time : new Date(); }
+    function newestDataTime() { return data.length > 0 ? data[data.length - 1].time : new Date(); }
+
+    function updateGraph() {
+        dataToShow = filterLatestMinutes(data, minutesToShow);
+
+        const svg = graphWindStrength(site, dataToShow, {
+          time: d => d.time,
+          windMph: d => d.Windspeedmph,
+          windMinMph: d => d.WindspeedmphMin,
+          windMaxMph: d => d.WindspeedmphMax,
+          width: 1024,
+          height: 400,
+        });
+
+        // For now we just remove the old graph and draw a new one.
+        // It seems to be fast enough.
+        graph.selectAll("svg").remove();
+        graph.node().append(svg);
+    }
 
     function poll() {
-        const newUpdateMs = Date.now();
-        const msToRetrieve = Math.min(maxUpdateSeconds * 1000, newUpdateMs - lastUpdateMs)
-        const samplesToRetrieve = msToSamples(msToRetrieve);
-        console.log("Last update: " + lastUpdateMs + " now: " + newUpdateMs + " seconds to retrieve: " + msToRetrieve + " samples to retrieve: " + samplesToRetrieve);
-        lastUpdateMs = newUpdateMs;
+        const msNewUpdate = Date.now();
+        const msDataAvailable = newestDataTime().getTime() - oldestDataTime().getTime();
+        const msToShow = minutesToMs(minutesToShow);
+        const msDataToRetrieve = msToShow > msDataAvailable ? msToShow : 0;
+        const msNewToRetrieve = msNewUpdate - msLastUpdate;
+        const msToRetrieve = Math.min(msToShow, msDataToRetrieve + msNewToRetrieve);
+        const samplesToRetrieve = Math.max(1, msToSamples(msToRetrieve));
 
         console.log("Asking for " + samplesToRetrieve + " samples");
         d3.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
+            msLastUpdate = msNewUpdate;
 
-            // The data is most-recent-first, but to avoid confusing us we reverse it here so it's in time order
-            newData = newData.reverse();
             console.log(newData);
-            data.push(...newData);
+            addData(d3.map(newData, parseData));
 
-            const svg = graphWindStrength(site, data, {
-              time: d => d3.timeParse("%Y-%m-%d %H:%M:%S")(d.time),
-              windMph: d => parseInt(d.Windspeedmph),
-              windMinMph: d => parseInt(d.WindspeedmphMin),
-              windMaxMph: d => parseInt(d.WindspeedmphMax),
-              width: 1024,
-              height: 400,
-            });
-
-            const graph = d3.select(eltId);
-            graph.data(data, function(d) { return d ? d.id : this.id; });
-            graph.selectAll("svg").remove();
-            graph.node().append(svg);
+            updateGraph();
         });
 
         // Ask for updated data soon
-        setTimeout(poll, refreshIntervalSecs * 1000);
+        setTimeout(poll, secondsToMs(refreshIntervalSecs));
     }
+
+    const minutesSlider = d3.select(minutesId).node();
+    console.log(minutesSlider);
+    minutesSlider.oninput = function() {
+        minutesToShow = this.value;
+        d3.select('#minutesToShowLabel').text("Show " + formatHours(minutesToShow));
+        console.log("Minutes to show changed to: " + minutesToShow);
+        updateGraph();
+    }
+
     poll();
 }
