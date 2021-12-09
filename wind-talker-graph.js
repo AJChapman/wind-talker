@@ -89,6 +89,19 @@ function weightedMovingAverage(xs_, n_) {
   return wmas;
 }
 
+function exponentialMovingAverage(xs_, alpha_) {
+    const alpha = alpha_;
+    const beta = 1.0 - alpha;
+    xs = [...xs_];
+
+    var ema = [];
+    xs.forEach((x, i) => {
+        ema.push(i == 0 ? x : alpha * x + beta * ema[i - 1]);
+    });
+    console.log(ema);
+    return ema;
+}
+
 function recentPeak(xs, n) { return recentSomething(Math.max, xs, n); }
 function recentLull(xs, n) { return recentSomething(Math.min, xs, n); }
 
@@ -131,6 +144,7 @@ function graphWindStrength(site, data, {
   strokeOpacity = 1, // stroke opacity of line
   movingAverageSmoothingSecs = 112.5, // Smooth over an 11.25 second period (10 samples)
   movingAverageSmoothingN = secondsToSamples(movingAverageSmoothingSecs), // how many values to smooth the average line over
+  movingAverageAlpha = 0.05, // Lower is smoother, 1.0 is no smoothing
   recentSecs = 600, // recent is 10 minutes
   recentN = secondsToSamples(recentSecs)
 } = {}) {
@@ -141,7 +155,7 @@ function graphWindStrength(site, data, {
   const WindMaxMph = d3.map(data, windMaxMph);
   const I = d3.range(Time.length);
 
-  const AvgMph = weightedMovingAverage(WindMph, movingAverageSmoothingN);
+  const AvgMph = exponentialMovingAverage(WindMph, movingAverageAlpha);
   const RecentPeakMph = recentPeak(WindMaxMph, recentN);
   const RecentLullMph = recentLull(WindMinMph, recentN);
 

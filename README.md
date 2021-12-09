@@ -6,7 +6,6 @@ To use this you will need to go to http://cors-anywhere.herokuapp.com/corsdemo a
 
 ## TODO
 
-- Replace weighted moving average with exponential moving average
 - Add wind direction graph
 - Local storage of previously retrieved data?
 - Variable window size (either fixed sizes, e.g. 1, 4, 12 hours, day, or a continuous selection up to a day)
