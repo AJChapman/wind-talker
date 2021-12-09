@@ -27,53 +27,17 @@
     
 <script type="application/javascript">
     $(document).ready(function(){
-        windTalkerGraph(springHill, '#graph', '#minutesToShow', "https://cors-anywhere.herokuapp.com/http://freeflightwx.com/acthpa/springhill/rawjson2.php");
+        windTalkerGraph(springHill, '#graph', '#minutesToShow', "http://localhost:8010/proxy/acthpa/springhill/rawjson2.php");
     });
 </script>
-<div class="container">
-<!-- Static navbar -->
-<nav class="navbar navbar-default navbar-static-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="../">Home</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li id="li_index"><a href="index.php">Current</a></li>
-                <!--<li id="li_15mins"><a href="15mins.php">15 Mins</a></li>-->
-                <li id="li_1hour"><a href="1hour.php">1 Hour</a></li>
-                <li id="li_4hours"><a href="4hours.php">4 Hours</a></li>
-                <li id="li_12hours"><a href="12hours.php">12 Hours</a></li>
-                <li id="li_day"><a href="day.php">Day</a></li>
-                <li id="li_table"><a href="table.php?h=24">Table</a></li>
-            </ul>
-        </div><!--/.nav-collapse -->
-    </div><!--/.container-fluid -->
-</nav>
 <h3>Spring Hill Weather Station</h3>
-</div>
-<!--
-<div class="container">
-    <div class="checkbox">
-        <label>
-            <input id="toggle" type="checkbox" checked data-toggle="toggle" data-size="mini" data-onstyle="info" data-offstyle="warning">
-            Auto refresh (every 3 seconds)
-        </label>
+
+<div id="graph" style="width: 100%;">
+    <div class="controls" id="controls">
+        <label for="minutesToShow" id="minutesToShowLabel">Show minutes: </label>
+        <input type="range" value="60" min="5" max="1440" id="minutesToShow" style="direction: rtl;"/>
     </div>
 </div>
--->
-<div class="controls" id="controls">
-    <label for="minutesToShow" id="minutesToShowLabel">Show minutes: </label>
-    <input type="range" min="5" max="1440" id="minutesToShow" style="direction: rtl;"/>
-</div>
-<div class="container" id="graph"></div>
-<div class="container" id="table"></div>
 </body>
 </html>
 

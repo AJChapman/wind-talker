@@ -131,14 +131,31 @@ function graphWindStrength(site, data, {
   defined, // for gaps in data
   curve = d3.curveLinear, // method of interpolation between points
   marginTop = 20, // top margin, in pixels
-  marginRight = 40, // right margin, in pixels
-  marginBottom = 30, // bottom margin, in pixels
-  marginLeft = 30, // left margin, in pixels
+  marginRight = 20, // right margin, in pixels
+  marginBottom = 20, // bottom margin, in pixels
+  marginLeft = 20, // left margin, in pixels
+  marginsX = marginLeft + marginRight,
+  marginMiddle = 30, // between the graphs
+  marginsY = marginTop + marginBottom + marginMiddle,
   width = 640, // outer width, in pixels
-  height = 400, // outer height, in pixels
+  heightGraph = 400,
+  yGraphBottom = marginTop + heightGraph,
+  yGraphTop = marginTop,
+  widthKt = 20,
+  xKt = width - marginsX - widthKt,
+  widthKmh = 30,
+  xKmh = xKt - widthKmh,
+  widthScales = widthKt + widthKmh,
+  widthMarginsScales = marginsX + widthScales,
+  widthGraph = width - widthMarginsScales,
+  xGraph = marginLeft,
+  hDir = heightGraph / 2, // height of the wind direction graph
+  xDir = xGraph,
+  yDir = yGraphBottom + marginMiddle,
+  heightTotal = marginsY + heightGraph + hDir,
   xDomain, // [xmin, xmax]
-  xRange = [marginLeft, width - marginRight], // [left, right]
-  yRange = [height - marginBottom, marginTop], // [bottom, top]
+  xRange = [xGraph, xGraph + widthGraph], // [left, right]
+  yRange = [yGraphBottom, yGraphTop], // [bottom, top]
   yFormat, // a format specifier string for the y-axis
   strokeLinecap = "round", // stroke line cap of the line
   strokeLinejoin = "round", // stroke line join of the line
@@ -161,9 +178,6 @@ function graphWindStrength(site, data, {
   const RecentPeakMph = recentPeak(WindMaxMph, recentN);
   const RecentLullMph = recentLull(WindMinMph, recentN);
 
-  const widthGraph = width - marginRight - marginLeft;
-  const heightGraph = height - marginTop - marginBottom;
-
   // Compute default domains.
   if (xDomain === undefined) xDomain = d3.extent(Time);
 
@@ -178,31 +192,31 @@ function graphWindStrength(site, data, {
   const mphScale = d3.scaleLinear(mphDomain, yRange);
   const ktScale = d3.scaleLinear(ktDomain, yRange);
   const kmhScale = d3.scaleLinear(kmhDomain, yRange);
-  const xAxis = d3.axisBottom(xScale).ticks(width / 70).tickSizeOuter(0);
-  const ktAxis = d3.axisRight(ktScale).ticks(height / 20, yFormat);
-  const kmhAxis = d3.axisRight(kmhScale).ticks(height / 20, yFormat);
+  const xAxis = d3.axisBottom(xScale).ticks(widthGraph / 70).tickSizeOuter(0);
+  const ktAxis = d3.axisRight(ktScale).ticks(heightGraph / 20, yFormat);
+  const kmhAxis = d3.axisRight(kmhScale).ticks(heightGraph / 20, yFormat);
 
   const svg = d3.create("svg")
       .attr("width", width)
       // .attr("height", height)
-      .attr("viewBox", [0, 0, width, height])
+      .attr("viewBox", [0, 0, width, heightTotal])
       .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
   svg.append("g")
-      .attr("transform", `translate(0,${height - marginBottom})`)
+      .attr("transform", `translate(0,${yGraphBottom})`)
       .call(xAxis);
 
   // Show the kt y axis
   svg.append("g")
-      .attr("transform", `translate(${width - marginRight / 2},0)`)
+      .attr("transform", `translate(${xGraph + widthGraph + widthKmh},0)`)
       .call(ktAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight / 2)
+          // .attr("x2", xKt)
           .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
-          .attr("x", marginRight / 4)
-          .attr("y", 10)
+          .attr("x", 5)
+          .attr("y", marginTop / 2)
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
           .attr("font-weight", "bold")
@@ -210,15 +224,15 @@ function graphWindStrength(site, data, {
 
   // Show the kmh y axis
   svg.append("g")
-      .attr("transform", `translate(${width - marginRight},0)`)
+      .attr("transform", `translate(${xGraph + widthGraph},0)`)
       .call(kmhAxis)
       //.call(g => g.select(".domain").remove())
       .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
+          // .attr("x2", xKmh)
           .attr("stroke-opacity", 0.1))
       .call(g => g.append("text")
-          .attr("x", 0)
-          .attr("y", 10)
+          .attr("x", 5)
+          .attr("y", marginTop / 2)
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
           .attr("font-weight", "bold")
@@ -228,7 +242,7 @@ function graphWindStrength(site, data, {
    svg.append("clipPath")
        .attr("id", "clip-low")
        .append("rect")
-           .attr("x", marginLeft)
+           .attr("x", xGraph)
            .attr("y", mphScale(site.speedLowMph))
            .attr("width", widthGraph)
            .attr("height", mphScale(0) - mphScale(site.speedLowMph));
@@ -237,7 +251,7 @@ function graphWindStrength(site, data, {
    svg.append("clipPath")
        .attr("id", "clip-on")
        .append("rect")
-           .attr("x", marginLeft)
+           .attr("x", xGraph)
            .attr("y", mphScale(site.speedOnMph))
            .attr("width", widthGraph)
            .attr("height", mphScale(site.speedLowMph) - mphScale(site.speedOnMph));
@@ -246,7 +260,7 @@ function graphWindStrength(site, data, {
    svg.append("clipPath")
        .attr("id", "clip-marginal")
        .append("rect")
-           .attr("x", marginLeft)
+           .attr("x", xGraph)
            .attr("y", mphScale(site.speedMarginalMph))
            .attr("width", widthGraph)
            .attr("height", mphScale(site.speedOnMph) - mphScale(site.speedMarginalMph));
@@ -255,7 +269,7 @@ function graphWindStrength(site, data, {
    svg.append("clipPath")
        .attr("id", "clip-danger")
        .append("rect")
-           .attr("x", marginLeft)
+           .attr("x", xGraph)
            .attr("y", mphScale(graphMaxMph))
            .attr("width", widthGraph)
            .attr("height", mphScale(site.speedMarginalMph) - mphScale(graphMaxMph));
@@ -264,37 +278,37 @@ function graphWindStrength(site, data, {
    svg.append("rect")
        .attr("fill", colorDangerBg)
        .attr("clip-path", "url(#clip-danger)")
-       .attr("x", 0)
+       .attr("x", xGraph)
        .attr("y", 0)
-       .attr("width", width)
-       .attr("height", height);
+       .attr("width", widthGraph)
+       .attr("height", heightGraph);
 
    // Draw the marginal zone background
    svg.append("rect")
        .attr("fill", colorMarginalBg)
        .attr("clip-path", "url(#clip-marginal)")
-       .attr("x", 0)
+       .attr("x", xGraph)
        .attr("y", 0)
-       .attr("width", width)
-       .attr("height", height);
+       .attr("width", widthGraph)
+       .attr("height", heightGraph);
 
    // Draw the on zone background
    svg.append("rect")
        .attr("fill", colorOnBg)
        .attr("clip-path", "url(#clip-on)")
-       .attr("x", 0)
+       .attr("x", xGraph)
        .attr("y", 0)
-       .attr("width", width)
-       .attr("height", height);
+       .attr("width", widthGraph)
+       .attr("height", heightGraph);
 
    // Draw the low zone background
    svg.append("rect")
        .attr("fill", colorLowBg)
        .attr("clip-path", "url(#clip-low)")
-       .attr("x", 0)
+       .attr("x", xGraph)
        .attr("y", 0)
-       .attr("width", width)
-       .attr("height", height);
+       .attr("width", widthGraph)
+       .attr("height", heightGraph);
 
    // Define the current wind band (between each sample's low and high)
    const windArea = d3.area()
@@ -412,6 +426,14 @@ function graphWindStrength(site, data, {
        .attr("stroke-miterlimit", 1)
        .attr("d", recentLullLine(I));
 
+   // Draw the direction background
+   svg.append("rect")
+      .attr("fill", colorDirOff)
+      .attr("x", xDir)
+      .attr("y", yDir)
+      .attr("width", widthGraph)
+      .attr("height", hDir);
+   
    return svg.node();
 }
 
@@ -467,12 +489,16 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
     function updateGraph() {
         dataToShow = filterLatestMinutes(data, minutesToShow);
 
+        console.log(graph);
+        console.log(graph.node());
+        const computedStyle = window.getComputedStyle(graph.node());
+        console.log(computedStyle);
         const svg = graphWindStrength(site, dataToShow, {
           time: d => d.time,
           windMph: d => d.Windspeedmph,
           windMinMph: d => d.WindspeedmphMin,
           windMaxMph: d => d.WindspeedmphMax,
-          width: 1024,
+          width: parseInt(computedStyle.width),
           height: 400,
         });
 
@@ -516,7 +542,7 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
 
     minutesSlider.oninput = function() {
         minutesToShow = this.value;
-        d3.select('#minutesToShowLabel').text("Show " + formatHours(minutesToShow));
+        d3.select('#minutesToShowLabel').text("Showing " + formatHours(minutesToShow));
         console.log("Minutes to show changed to: " + minutesToShow);
         updateGraph();
         pollSoon(uiUpdateIntervalMs);
