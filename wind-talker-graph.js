@@ -129,7 +129,7 @@ function graphWindStrength(site, data, {
   windMinMph,
   windMaxMph,
   defined, // for gaps in data
-  curve = d3.curveLinear, // method of interpolation between points
+  curve = d3.curveBumpX, // method of interpolation between points
   marginTop = 20, // top margin, in pixels
   marginRight = 20, // right margin, in pixels
   marginBottom = 20, // bottom margin, in pixels
@@ -175,6 +175,7 @@ function graphWindStrength(site, data, {
   const I = d3.range(Time.length);
 
   const AvgMph = exponentialMovingAverage(WindMph, movingAverageAlpha);
+  // const AvgMph = weightedMovingAverage(WindMph, movingAverageSmoothingN);
   const RecentPeakMph = recentPeak(WindMaxMph, recentN);
   const RecentLullMph = recentLull(WindMinMph, recentN);
 
@@ -440,7 +441,7 @@ function graphWindStrength(site, data, {
 function parseData(obj) {
     obj.id = parseInt(obj.id);
     obj.time = d3.timeParse("%Y-%m-%d %H:%M:%S")(obj.time);
-    obj.Windspeedmph = parseInt(obj.WindSpeedmph);
+    obj.Windspeedmph = parseFloat(obj.Windspeedmph);
     obj.windspeedmphMin = parseInt(obj.WindspeedmphMin);
     obj.WindspeedmphMax = parseInt(obj.WindspeedmphMax);
     return obj;
@@ -489,10 +490,7 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
     function updateGraph() {
         dataToShow = filterLatestMinutes(data, minutesToShow);
 
-        console.log(graph);
-        console.log(graph.node());
         const computedStyle = window.getComputedStyle(graph.node());
-        console.log(computedStyle);
         const svg = graphWindStrength(site, dataToShow, {
           time: d => d.time,
           windMph: d => d.Windspeedmph,
@@ -518,7 +516,6 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
         const msNewUpdate = Date.now();
         const msDataAvailable = newestDataTime().getTime() - oldestDataTime().getTime() + samplesToMs(2); // Add 2 samples to account for rounding
         const msToShow = minutesToMs(minutesToShow);
-        console.log("msToShow: " + msToShow + ", msDataAvailable: " + msDataAvailable);
         const msDataToRetrieve = msToShow > msDataAvailable ? msToShow : 0;
         const msNewToRetrieve = msNewUpdate - msLastUpdate;
         const msToRetrieve = Math.min(msToShow, msDataToRetrieve + msNewToRetrieve) + 1;
