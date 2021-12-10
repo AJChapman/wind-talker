@@ -30,7 +30,7 @@ const springHill = {
   speedMarginalMph: 22,
   speedMaxMph:      150, // max recordable wind speed to cancel out electrical interference
   dirOnDeg:         280,
-  dirWidthDeg:      45,
+  dirWidthDeg:      90,
   altitudeFt:       2870,
   dirAdjust:        0
 };
@@ -128,6 +128,7 @@ function graphWindStrength(site, data, {
   windMph,
   windMinMph,
   windMaxMph,
+  windDir,
   defined, // for gaps in data
   curve = d3.curveBumpX, // method of interpolation between points
   marginTop = 20, // top margin, in pixels
@@ -135,10 +136,10 @@ function graphWindStrength(site, data, {
   marginBottom = 20, // bottom margin, in pixels
   marginLeft = 20, // left margin, in pixels
   marginsX = marginLeft + marginRight,
-  marginMiddle = 30, // between the graphs
+  marginMiddle = 25, // between the graphs
   marginsY = marginTop + marginBottom + marginMiddle,
   width = 640, // outer width, in pixels
-  heightGraph = 400,
+  heightGraph = 200,
   yGraphBottom = marginTop + heightGraph,
   yGraphTop = marginTop,
   widthKt = 20,
@@ -149,14 +150,14 @@ function graphWindStrength(site, data, {
   widthMarginsScales = marginsX + widthScales,
   widthGraph = width - widthMarginsScales,
   xGraph = marginLeft,
-  hDir = heightGraph / 2, // height of the wind direction graph
+  hDir = 100, // height of the wind direction graph
   xDir = xGraph,
   yDir = yGraphBottom + marginMiddle,
+  dirRange = [yDir, yDir + hDir],
   heightTotal = marginsY + heightGraph + hDir,
   xDomain, // [xmin, xmax]
   xRange = [xGraph, xGraph + widthGraph], // [left, right]
   yRange = [yGraphBottom, yGraphTop], // [bottom, top]
-  yFormat, // a format specifier string for the y-axis
   strokeLinecap = "round", // stroke line cap of the line
   strokeLinejoin = "round", // stroke line join of the line
   strokeWidth = 1.5, // stroke width of line, in pixels
@@ -172,6 +173,7 @@ function graphWindStrength(site, data, {
   const WindMph = d3.map(data, windMph);
   const WindMinMph = d3.map(data, windMinMph);
   const WindMaxMph = d3.map(data, windMaxMph);
+  const Dir = d3.map(data, windDir);
   const I = d3.range(Time.length);
 
   const AvgMph = exponentialMovingAverage(WindMph, movingAverageAlpha);
@@ -187,6 +189,10 @@ function graphWindStrength(site, data, {
   const mphDomain = [0, graphMaxMph];
   const ktDomain = [0, mphToKt(graphMaxMph)];
   const kmhDomain = [0, mphToKmh(graphMaxMph)];
+  const dirDomain = [0, 359]; // degrees
+  const dirStartDeg = site.dirOnDeg - site.dirWidthDeg / 2;
+  const dirEndDeg = site.dirOnDeg + site.dirWidthDeg / 2;
+  const dirWidthDeg = dirEndDeg - dirStartDeg;
 
   // Construct scales and axes.
   const xScale = d3.scaleTime(xDomain, xRange);
@@ -194,8 +200,11 @@ function graphWindStrength(site, data, {
   const ktScale = d3.scaleLinear(ktDomain, yRange);
   const kmhScale = d3.scaleLinear(kmhDomain, yRange);
   const xAxis = d3.axisBottom(xScale).ticks(widthGraph / 70).tickSizeOuter(0);
-  const ktAxis = d3.axisRight(ktScale).ticks(heightGraph / 20, yFormat);
-  const kmhAxis = d3.axisRight(kmhScale).ticks(heightGraph / 20, yFormat);
+  const ktAxis = d3.axisRight(ktScale).ticks(heightGraph / 20);
+  const kmhAxis = d3.axisRight(kmhScale).ticks(heightGraph / 20);
+  const dirScale = d3.scaleLinear(dirDomain, dirRange);
+  const cardinalScale = d3.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], dirRange);
+  const cardinalAxis = d3.axisRight(cardinalScale);
 
   const svg = d3.create("svg")
       .attr("width", width)
@@ -434,7 +443,34 @@ function graphWindStrength(site, data, {
       .attr("y", yDir)
       .attr("width", widthGraph)
       .attr("height", hDir);
+
+   // Draw the good direction band
+   svg.append("rect")
+       .attr("fill", colorDirOn)
+       .attr("x", xDir)
+       .attr("y", dirScale(dirStartDeg))
+       .attr("width", widthGraph)
+       .attr("height", dirScale(dirEndDeg) - dirScale(dirStartDeg));
    
+  // Show the direction scale
+  svg.append("g")
+      .attr("transform", `translate(${xGraph + widthGraph},0)`)
+      .call(cardinalAxis);
+
+   const dirLine = d3.line()
+       .curve(curve)
+       .x(i => xScale(Time[i]))
+       .y(i => dirScale(Dir[i]));
+   svg.append("path")
+       .attr("fill", "none")
+       .attr("stroke", colorDir)
+       .attr("stroke-width", strokeWidth)
+       .attr("stroke-linecap", strokeLinecap)
+       .attr("stroke-linejoin", strokeLinejoin)
+       .attr("stroke-opacity", strokeOpacity)
+       .attr("stroke-miterlimit", 1)
+       .attr("d", dirLine(I));
+
    return svg.node();
 }
 
@@ -442,8 +478,9 @@ function parseData(obj) {
     obj.id = parseInt(obj.id);
     obj.time = d3.timeParse("%Y-%m-%d %H:%M:%S")(obj.time);
     obj.Windspeedmph = parseFloat(obj.Windspeedmph);
-    obj.windspeedmphMin = parseInt(obj.WindspeedmphMin);
+    obj.WindspeedmphMin = parseInt(obj.WindspeedmphMin);
     obj.WindspeedmphMax = parseInt(obj.WindspeedmphMax);
+    obj.Winddir = parseInt(obj.Winddir);
     return obj;
 }
 
@@ -496,8 +533,8 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
           windMph: d => d.Windspeedmph,
           windMinMph: d => d.WindspeedmphMin,
           windMaxMph: d => d.WindspeedmphMax,
+          windDir: d => d.Winddir,
           width: parseInt(computedStyle.width),
-          height: 400,
         });
 
         // For now we just remove the old graph and draw a new one.
@@ -543,6 +580,10 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
         console.log("Minutes to show changed to: " + minutesToShow);
         updateGraph();
         pollSoon(uiUpdateIntervalMs);
+    }
+
+    window.onresize = function() {
+        updateGraph();
     }
 
     // Changing the minutes slider triggers a poll, so we do this to start
