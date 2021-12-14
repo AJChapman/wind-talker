@@ -9,3 +9,6 @@ To install this, follow the instructions at https://www.npmjs.com/package/local-
 
 - Local storage of previously retrieved data?
 - Logarithmic time scale? Recent values more spaced out, compressing as time passes.
+- Fill in gaps in data
+- Use typescript
+- Use MobX
