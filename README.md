@@ -7,6 +7,5 @@ To install this, follow the instructions at https://www.npmjs.com/package/local-
 
 ## TODO
 
-- Add wind direction graph
 - Local storage of previously retrieved data?
 - Logarithmic time scale? Recent values more spaced out, compressing as time passes.
