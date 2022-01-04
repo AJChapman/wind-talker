@@ -1,0 +1,29 @@
+{
+  "name": "wind-talker",
+  "version": "1.0.0",
+  "description": "Wind Talker graphs for freeflightwx.com",
+  "main": "wind-talker-graph.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AJChapman/wind-talker.git"
+  },
+  "keywords": [
+    "d3"
+  ],
+  "author": "Alex Chapman <alex@farfromthere.net>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AJChapman/wind-talker/issues"
+  },
+  "homepage": "https://github.com/AJChapman/wind-talker#readme",
+  "dependencies": {
+    "@types/d3": "^7.1.0",
+    "d3": "^7.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
+}
