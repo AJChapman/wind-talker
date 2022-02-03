@@ -564,16 +564,21 @@ function windTalkerGraph(site: Site, graphId: string, minutesId: string, rawjson
         const samplesToShow = filterLatestMinutes(samples, minutesToShow);
 
         const graphNode: d3.BaseType = graph.node();
-        if (typeof graphNode === 'Element') {
-            const computedStyle = window.getComputedStyle(graphNode);
-            const svg = graphWindStrength(site, samplesToShow, {
-              width: parseInt(computedStyle.width),
-            });
+        switch (graphNode.kind) {
+            case 'Element':
+                const computedStyle = window.getComputedStyle(graphNode);
+                const svg = graphWindStrength(site, samplesToShow, {
+                  width: parseInt(computedStyle.width),
+                });
 
-            // For now we just remove the old graph and draw a new one.
-            // It seems to be fast enough.
-            graph.selectAll("svg").remove();
-            graphNode.append(svg);
+                // For now we just remove the old graph and draw a new one.
+                // It seems to be fast enough.
+                graph.selectAll("svg").remove();
+                graphNode.append(svg);
+                return;
+            default:
+                console.log("Unexpected graph node kind: " + graphNode.kind);
+                return;
         }
     }
 
@@ -597,6 +602,7 @@ function windTalkerGraph(site: Site, graphId: string, minutesId: string, rawjson
             d3.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
                 msLastUpdate = msNewUpdate;
 
+                
                 addData(d3.map(newData, parseSample));
 
                 updateGraph();
