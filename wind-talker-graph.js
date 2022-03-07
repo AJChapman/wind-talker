@@ -62,7 +62,7 @@ function mphToKt(mph) { return mph * 0.8689758; }
 function mphToKmh(mph) { return mph * 1.609344; }
 function clamp(x, l, h) { return Math.max(l, Math.min(h, x)); }
 function secondsToSamples(sec) { return Math.floor(sec / sampleIntervalSecs); }
-function samplesToMs(samples) { return secondsToMs(sampleIntervalSecs); }
+function samplesToMs(samples) { return samples * secondsToMs(sampleIntervalSecs); }
 function msToSamples(ms) { return Math.floor(ms / secondsToMs(sampleIntervalSecs)); }
 function samplesToSeconds(n) { return n * sampleIntervalSecs; }
 function secondsToMs(sec) { return sec * 1000; }
@@ -75,19 +75,22 @@ function exponentialMovingAverage(xs, alpha) {
     const beta = 1.0 - alpha;
     let ema = [];
     xs.forEach((x, i) => {
-        ema.push(i == 0 ? x : alpha * x + beta * ema[i - 1]);
+        const prev = ema[i - 1];
+        ema.push(prev === undefined ? x : alpha * x + beta * prev);
     });
     return ema;
 }
-function recentPeak(xs, n) { return recentSomething(Math.max, xs, n); }
-function recentLull(xs, n) { return recentSomething(Math.min, xs, n); }
-function recentSomething(fn, xs, n) {
+function recentPeak(xs, n) { return recent(Math.max, xs, n); }
+function recentLull(xs, n) { return recent(Math.min, xs, n); }
+function recent(fn, xs, n) {
     // This is O(n * length(xs)), so not terribly efficient
     let results = [];
     xs.forEach((x, i, a) => {
         let result = x;
         for (let j = Math.max(0, i - n); j < i; j++) {
-            result = fn(result, a[j]);
+            const val = a[j];
+            if (typeof val !== 'undefined')
+                result = fn(result, val);
         }
         results.push(result);
     });
@@ -107,8 +110,6 @@ strokeLinecap = "round", // stroke line cap of the line
 strokeLinejoin = "round", // stroke line join of the line
 strokeWidth = 1.5, // stroke width of line, in pixels
 strokeOpacity = 1, // stroke opacity of line
-movingAverageSmoothingSecs = 112.5, // Smooth over an 11.25 second period (10 samples)
-movingAverageSmoothingN = secondsToSamples(movingAverageSmoothingSecs), // how many values to smooth the average line over
 movingAverageAlpha = 0.05, // Lower is smoother, 1.0 is no smoothing
 recentSecs = 600, // recent is 10 minutes
 recentN = secondsToSamples(recentSecs) } = {}) {
@@ -123,10 +124,12 @@ recentN = secondsToSamples(recentSecs) } = {}) {
     const RecentPeakMph = recentPeak(WindMaxMph, recentN);
     const RecentLullMph = recentLull(WindMinMph, recentN);
     // Compute default domains.
-    const xDomain = (([a, b]));
-    [a === undefined ? new Date() : a, b === undefined ? new Date() : b];
-    (d3.extent(Time));
-    ;
+    const xDomain = (function (e) {
+        let [a, b] = e;
+        const a_ = typeof a === 'undefined' ? new Date() : a;
+        const b_ = typeof b === 'undefined' ? new Date() : b;
+        return [a_, b_];
+    })(d3.extent(Time));
     // Scale up to at least the marginal wind strength, or the max wind strength shown, but no more than the site max.
     const sampleMaxMph = d3.max(WindMaxMph);
     const graphMaxMph = Math.min(site.speedMaxMph, Math.max((sampleMaxMph ? sampleMaxMph : 0) + mphHeadroom, site.speedMarginalMph));
@@ -136,7 +139,6 @@ recentN = secondsToSamples(recentSecs) } = {}) {
     const dirDomain = [0, 359]; // degrees
     const dirStartDeg = site.dirOnDeg - site.dirWidthDeg / 2;
     const dirEndDeg = site.dirOnDeg + site.dirWidthDeg / 2;
-    const dirWidthDeg = dirEndDeg - dirStartDeg;
     // Construct scales and axes.
     const xScale = d3.scaleTime(xDomain, xRange);
     const mphScale = d3.scaleLinear(mphDomain, yRange);
@@ -434,15 +436,23 @@ function windTalkerGraph(site, graphId, minutesId, rawjsonurl) {
     function oldestDataTime() { return samples[0] ? samples[0].time : new Date(); }
     function newestDataTime() { return samples.length > 0 ? samples[samples.length - 1].time : new Date(); }
     function updateGraph() {
-        samplesToShow = filterLatestMinutes(samples, minutesToShow);
-        const computedStyle = window.getComputedStyle(graph.node());
-        const svg = graphWindStrength(site, samplesToShow, {
-            width: parseInt(computedStyle.width),
-        });
-        // For now we just remove the old graph and draw a new one.
-        // It seems to be fast enough.
-        graph.selectAll("svg").remove();
-        graph.node().append(svg);
+        const samplesToShow = filterLatestMinutes(samples, minutesToShow);
+        const graphNode = graph.node();
+        switch (graphNode.kind) {
+            case 'Element':
+                const computedStyle = window.getComputedStyle(graphNode);
+                const svg = graphWindStrength(site, samplesToShow, {
+                    width: parseInt(computedStyle.width),
+                });
+                // For now we just remove the old graph and draw a new one.
+                // It seems to be fast enough.
+                graph.selectAll("svg").remove();
+                graphNode.append(svg);
+                return;
+            default:
+                console.log("Unexpected graph node kind: " + graphNode.kind);
+                return;
+        }
     }
     function pollSoon(delayMs) {
         clearTimeout(pollTimeout);

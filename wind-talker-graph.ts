@@ -492,7 +492,7 @@ function graphWindStrength(site: Site, samples: Sample[], {
       .attr("transform", `translate(${xGraph + widthGraph},0)`)
       .call(cardinalAxis);
 
-   const dirLine = d3.line()
+   const dirLine = d3.line<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y(i => dirScale(Dir[i]));
@@ -537,12 +537,14 @@ function formatHours(minutes: number): string {
     return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText);
 }
 
-function windTalkerGraph(site: Site, graphId: string, minutesId: string, rawjsonurl: string) {
+function isElement(elt: d3.BaseType): elt is Element {
+    return (elt as Element).className !== undefined;
+}
+
+function windTalkerGraph(site: Site, graph: HTMLElement, minutesSlider: HTMLElement, rawjsonurl: string) {
     let samples: Sample[] = [];
     let msLastUpdate = 0;
     let minutesToShow = 60;
-    const graph = d3.select(graphId);
-    const minutesSlider = d3.select(minutesId).node();
     let pollTimeout: number | null = null;
     const refreshIntervalMs = secondsToMs(refreshIntervalSecs);
     const uiUpdateIntervalMs = 300;
@@ -563,23 +565,15 @@ function windTalkerGraph(site: Site, graphId: string, minutesId: string, rawjson
     function updateGraph() {
         const samplesToShow = filterLatestMinutes(samples, minutesToShow);
 
-        const graphNode: d3.BaseType = graph.node();
-        switch (graphNode.kind) {
-            case 'Element':
-                const computedStyle = window.getComputedStyle(graphNode);
-                const svg = graphWindStrength(site, samplesToShow, {
-                  width: parseInt(computedStyle.width),
-                });
+        const computedStyle = window.getComputedStyle(graph);
+        const svg = graphWindStrength(site, samplesToShow, {
+          width: parseInt(computedStyle.width),
+        });
 
-                // For now we just remove the old graph and draw a new one.
-                // It seems to be fast enough.
-                graph.selectAll("svg").remove();
-                graphNode.append(svg);
-                return;
-            default:
-                console.log("Unexpected graph node kind: " + graphNode.kind);
-                return;
-        }
+        // For now we just remove the old graph and draw a new one.
+        // It seems to be fast enough.
+        d3.select(graph).selectAll("svg").remove();
+        graph.append(svg);
     }
 
     function pollSoon(delayMs: number): void {

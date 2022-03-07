@@ -25,8 +25,12 @@
 <body>
     
 <script type="application/javascript">
-    $(document).ready(function(){
-        windTalkerGraph(springHill, '#graph', '#minutesToShow', "http://localhost:8010/proxy/acthpa/springhill/rawjson2.php");
+    $(document).ready(function() {
+        const graph = document.getElementById('#graph');
+        const minutesSlider = document.getElementById('#minutesToShow');
+        if (graph !== null && minutesSlider !== null) {
+            windTalkerGraph(springHill, graph, minutesSlider, "http://localhost:8010/proxy/acthpa/springhill/rawjson2.php");
+        }
     });
 </script>
 <h3>Spring Hill Weather Station</h3>
