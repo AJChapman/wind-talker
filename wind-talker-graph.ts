@@ -1,3 +1,4 @@
+export {windTalkerGraph, springHill};
 import * as d3 from 'd3';
 
 interface Site {
@@ -83,17 +84,17 @@ const refreshIntervalSecs: number = sampleIntervalSecs;
 // Utility functions
 function mphToKt(mph: number): number { return mph * 0.8689758; }
 function mphToKmh(mph: number): number { return mph * 1.609344; }
-function clamp(x: number, l: number, h: number): number { return Math.max(l, Math.min(h, x)); }
+//function clamp(x: number, l: number, h: number): number { return Math.max(l, Math.min(h, x)); }
 function secondsToSamples(sec: number): number { return Math.floor(sec / sampleIntervalSecs); }
 function samplesToMs(samples: number): number { return samples * secondsToMs(sampleIntervalSecs); }
 function msToSamples(ms: number): number { return Math.floor(ms / secondsToMs(sampleIntervalSecs)); }
-function samplesToSeconds(n: number): number { return n * sampleIntervalSecs; }
+//function samplesToSeconds(n: number): number { return n * sampleIntervalSecs; }
 function secondsToMs(sec: number): number { return sec * 1000; }
 function minutesToMs(min: number): number { return min * 60000; }
 
 // The largest period to update in one go
-const maxUpdateSeconds: number = 24 * 60 * 60; // 24 hours
-const maxUpdateSamples: number = secondsToSamples(maxUpdateSeconds);
+//const maxUpdateSeconds: number = 24 * 60 * 60; // 24 hours
+//const maxUpdateSamples: number = secondsToSamples(maxUpdateSeconds);
 
 function exponentialMovingAverage(xs: readonly number[], alpha: number): number[] {
     // alpha should be between 0.0 and 1.0, and is the weight of the latest sample
@@ -177,9 +178,9 @@ function graphWindStrength(site: Site, samples: Sample[], {
   yGraphBottom = marginTop + heightGraph,
   yGraphTop = marginTop,
   widthKt = 20,
-  xKt = width - marginsX - widthKt,
+  //xKt = width - marginsX - widthKt,
   widthKmh = 30,
-  xKmh = xKt - widthKmh,
+  //xKmh = xKt - widthKmh,
   widthScales = widthKt + widthKmh,
   widthMarginsScales = marginsX + widthScales,
   widthGraph = width - widthMarginsScales,
@@ -537,19 +538,16 @@ function formatHours(minutes: number): string {
     return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText);
 }
 
-function isElement(elt: d3.BaseType): elt is Element {
-    return (elt as Element).className !== undefined;
-}
-
-function windTalkerGraph(site: Site, graph: HTMLElement, minutesSlider: HTMLElement, rawjsonurl: string) {
+function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt: HTMLElement, rawjsonurl: string) {
     let samples: Sample[] = [];
     let msLastUpdate = 0;
     let minutesToShow = 60;
     let pollTimeout: number | null = null;
     const refreshIntervalMs = secondsToMs(refreshIntervalSecs);
     const uiUpdateIntervalMs = 300;
+    const minutesSlider = minutesSliderElt as HTMLInputElement;
 
-    function addData(newData: Sample[]) {
+    function addData(newData: Sample[]): void {
         // Concatenate and then sort and remove consecutive duplicates
         newData = samples.concat(newData);
         newData.sort(function(a, b) { return a.id - b.id; });
@@ -595,12 +593,8 @@ function windTalkerGraph(site: Site, graph: HTMLElement, minutesSlider: HTMLElem
             console.log("Asking for " + samplesToRetrieve + " samples");
             d3.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
                 msLastUpdate = msNewUpdate;
-
-                
-                addData(d3.map(newData, parseSample));
-
+                addData(d3.map(newData as Iterable<SampleRaw>, parseSample));
                 updateGraph();
-
             });
         }
 
@@ -608,8 +602,9 @@ function windTalkerGraph(site: Site, graph: HTMLElement, minutesSlider: HTMLElem
         pollSoon(refreshIntervalMs);
     }
 
-    minutesSlider.oninput = function() {
-        minutesToShow = this.value;
+    minutesSlider?.addEventListener("input", handleMinutesChanged);
+    function handleMinutesChanged(): void {
+        minutesToShow = minutesSlider.valueAsNumber;
         d3.select('#minutesToShowLabel').text("Showing " + formatHours(minutesToShow));
         console.log("Minutes to show changed to: " + minutesToShow);
         updateGraph();
@@ -621,5 +616,5 @@ function windTalkerGraph(site: Site, graph: HTMLElement, minutesSlider: HTMLElem
     }
 
     // Changing the minutes slider triggers a poll, so we do this to start
-    minutesSlider.oninput();
+    handleMinutesChanged();
 }
