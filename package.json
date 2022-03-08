@@ -3,27 +3,35 @@
   "version": "1.0.0",
   "description": "Wind Talker graphs for freeflightwx.com",
   "main": "wind-talker-graph.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "author": "Alex Chapman <alex@farfromthere.net>",
+  "homepage": "https://github.com/AJChapman/wind-talker#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AJChapman/wind-talker.git"
   },
-  "keywords": [
-    "d3"
-  ],
-  "author": "Alex Chapman <alex@farfromthere.net>",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/AJChapman/wind-talker/issues"
   },
-  "homepage": "https://github.com/AJChapman/wind-talker#readme",
+  "license": "ISC",
+  "keywords": [
+    "d3"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run clean && npm run watch & npm run server",
+    "build": "tsc",
+    "clean": "tsc --build --clean",
+    "watch": "tsc --watch",
+    "server": "http-server -o d3.html --proxy http://freeflightwx.com",
+    "proxy": "lcp --proxyUrl http://freeflightwx.com"
+  },
   "dependencies": {
     "@types/d3": "^7.1.0",
     "d3": "^7.2.1"
   },
   "devDependencies": {
-    "typescript": "^4.5.4"
+    "http-server": "^14.1.0",
+    "local-cors-proxy": "^1.1.0",
+    "typescript": "^4.6.2"
   }
 }
