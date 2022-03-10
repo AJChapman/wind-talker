@@ -5,12 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FreeFlight Wx</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-    <script src="http://freeflightwx.com/acthpa/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.1.0/js/bootstrap-toggle.min.js"></script>
-    <script src="./wind-talker-graph.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="bundle.js"></script>
     <!-- Bootstrap -->
     <link href="http://freeflightwx.com/acthpa/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.1.0/css/bootstrap-toggle.min.css" rel="stylesheet">
@@ -23,16 +19,7 @@
     <![endif]-->
 </head>
 <body>
-    
-<script type="application/javascript">
-    $(document).ready(function() {
-        const graph = document.getElementById('#graph');
-        const minutesSlider = document.getElementById('#minutesToShow');
-        if (graph !== null && minutesSlider !== null) {
-            windTalkerGraph(springHill, graph, minutesSlider, "http://localhost:8010/proxy/acthpa/springhill/rawjson2.php");
-        }
-    });
-</script>
+
 <h3>Spring Hill Weather Station</h3>
 
 <div id="graph" style="width: 100%;">
@@ -43,4 +30,3 @@
 </div>
 </body>
 </html>
-

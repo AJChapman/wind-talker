@@ -1,4 +1,3 @@
-export {windTalkerGraph, springHill};
 import * as d3 from 'd3';
 
 interface Site {
@@ -64,7 +63,7 @@ const colorDir:         string = '#ffff00';
 const mphHeadroom: number = 4; // How many mph to graph above the maximum shown, so the peak doesn't touch the top of the graph
 
 // Sites
-const springHill: Site = {
+export const springHill: Site = {
   name:             'Spring Hill',
   timezone:         'Australia/Sydney',
   speedLowMph:      13,
@@ -538,7 +537,7 @@ function formatHours(minutes: number): string {
     return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText);
 }
 
-function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt: HTMLElement, rawjsonurl: string) {
+export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt: HTMLElement, rawjsonurl: string) {
     let samples: Sample[] = [];
     let msLastUpdate = 0;
     let minutesToShow = 60;
