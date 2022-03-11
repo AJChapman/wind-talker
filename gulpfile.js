@@ -1,63 +1,64 @@
 var gulp = require("gulp");
 var browserify = require("browserify");
 var source = require("vinyl-source-stream");
-var watchify = require("watchify");
-var tsify = require("tsify");
 var fancy_log = require("fancy-log");
 var sourcemaps = require("gulp-sourcemaps");
 var buffer = require("vinyl-buffer");
+var del = require("del");
+
 var paths = {
-    pages: ["src/*.html"]
+    pages: {
+        src: ["src/*.html"],
+        dest: 'dist/'
+    },
+    typescripts: {
+        src: 'src/**/*.ts',
+        dest: 'ts-out/'
+    },
+    scripts: {
+        entries: 'ts-out/main.js',
+        dest: 'dist/'
+    }
 };
 
-gulp.task("copy-html", function() {
-    return gulp.src(paths.pages).pipe(gulp.dest("dist"));
-});
+function clean() {
+    del([paths.pages.dest, paths.typescripts.dest]);
+}
 
-var browserTsify = browserify({
-        basedir: ".",
-        debug: true,
-        entries: ["src/main.ts"],
-        cache: {},
-        packageCache: {},
-    })
-    .plugin(tsify);
+function pages() {
+    return gulp.src(paths.pages.src).pipe(gulp.dest(paths.pages.dest));
+}
 
-var watchedBrowserify = watchify(browserTsify);
+function typescripts() {
+    const tsconfig = require('./tsconfig.json');
+    gulp.src(paths.typescripts.src)
+      .pipe(ts(tsconfig.compilerOptions))
+      .pipe(gulp.dest(paths.typescripts.dest));
+}
 
-function bundle() {
-    //return watchedBrowserify
-    return browserTsify
-      .transform("babelify", {
-          global: true,
-          ignore: [/\/node_modules\/(?!d3\/)/, /\/node_modules\/(?!d3-delaunay\/)/, /\/node_modules\/(?!internmap\/)/],
-          presets: [
-              "@babel/preset-typescript",
-              [
-                  "@babel/preset-env",
-                  {
-                      "targets": {
-                          "edge": "17",
-                          "firefox": "60",
-                          "chrome": "67",
-                          "safari": "11.1"
-                      },
-                      "useBuiltIns": "usage",
-                      "corejs": "3.21.1"
-                  }
-                ]
-            ],
-          extensions: [".ts", ".js"],
-      })
+function scripts() {
+    const babelconfig = require('./babel.config.json');
+    return browserify({
+        entries: paths.scripts.entries,
+        debug: false,
+    }).transform(babelify.configure(babelconfig))
       .bundle()
       .on("error", fancy_log)
       .pipe(source("bundle.js"))
       .pipe(buffer())
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write("./"))
-      .pipe(gulp.dest("dist"));
+      .pipe(gulp.dest(paths.scripts.dest));
 }
 
-gulp.task("default", gulp.series(gulp.parallel("copy-html"), bundle));
-//watchedBrowserify.on("update", bundle);
-//watchedBrowserify.on("log", fancy_log);
+var build = gulp.series(clean, gulp.parallel(pages, gulp.series(typescripts, scripts)));
+
+function watch() {
+    gulp.watch(paths.pages.src);
+    gulp.watch(paths.typescripts.src);
+}
+
+exports.clean = clean;
+exports.build = build;
+exports.watch = watch;
+exports.default = build;

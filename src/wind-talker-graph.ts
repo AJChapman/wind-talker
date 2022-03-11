@@ -1,4 +1,9 @@
-import * as d3 from 'd3';
+import * as d3Array from 'd3-array';
+import * as d3Axis from 'd3-axis';
+import * as d3Scale from 'd3-scale';
+import * as d3Selection from 'd3-selection';
+import * as d3Fetch from 'd3-fetch';
+import * as d3Shape from 'd3-shape';
 
 interface Site {
     name: string;
@@ -125,7 +130,7 @@ function recent(fn: (x: number, y: number) => number, xs: readonly number[], n: 
 }
 
 interface WindGraphArgs {
-  curve?: d3.CurveFactory; // method of interpolation between points
+  curve?: d3Shape.CurveFactory; // method of interpolation between points
   marginTop?: number; // top margin, in pixels
   marginRight?: number; // right margin, in pixels
   marginBottom?: number; // bottom margin, in pixels
@@ -164,7 +169,7 @@ interface WindGraphArgs {
 }
 
 function graphWindStrength(site: Site, samples: Sample[], {
-  curve = d3.curveBumpX, // method of interpolation between points
+  curve = d3Shape.curveBumpX, // method of interpolation between points
   marginTop = 20, // top margin, in pixels
   marginRight = 20, // right margin, in pixels
   marginBottom = 20, // bottom margin, in pixels
@@ -200,12 +205,12 @@ function graphWindStrength(site: Site, samples: Sample[], {
   recentN = secondsToSamples(recentSecs)
 }: WindGraphArgs = {}) {
   // Compute values.
-  const Time = d3.map(samples, s => s.time);
-  const WindMph = d3.map(samples, s => s.windSpeedMph);
-  const WindMinMph = d3.map(samples, s => s.windMinMph);
-  const WindMaxMph = d3.map(samples, s => s.windMaxMph);
-  const Dir = d3.map(samples, s => s.windDirectionDeg);
-  const I = d3.range(Time.length);
+  const Time = d3Array.map(samples, s => s.time);
+  const WindMph = d3Array.map(samples, s => s.windSpeedMph);
+  const WindMinMph = d3Array.map(samples, s => s.windMinMph);
+  const WindMaxMph = d3Array.map(samples, s => s.windMaxMph);
+  const Dir = d3Array.map(samples, s => s.windDirectionDeg);
+  const I = d3Array.range(Time.length);
 
   const AvgMph = exponentialMovingAverage(WindMph, movingAverageAlpha);
   const RecentPeakMph = recentPeak(WindMaxMph, recentN);
@@ -217,10 +222,10 @@ function graphWindStrength(site: Site, samples: Sample[], {
       const a_ = typeof a === 'undefined' ? new Date() : a;
       const b_ = typeof b === 'undefined' ? new Date() : b;
       return [a_, b_];
-    })(d3.extent(Time));
+    })(d3Array.extent(Time));
 
   // Scale up to at least the marginal wind strength, or the max wind strength shown, but no more than the site max.
-  const sampleMaxMph = d3.max(WindMaxMph);
+  const sampleMaxMph = d3Array.max(WindMaxMph);
   const graphMaxMph = Math.min(site.speedMaxMph, Math.max((sampleMaxMph ? sampleMaxMph : 0) + mphHeadroom, site.speedMarginalMph));
   const mphDomain = [0, graphMaxMph];
   const ktDomain = [0, mphToKt(graphMaxMph)];
@@ -230,18 +235,18 @@ function graphWindStrength(site: Site, samples: Sample[], {
   const dirEndDeg = site.dirOnDeg + site.dirWidthDeg / 2;
 
   // Construct scales and axes.
-  const xScale = d3.scaleTime(xDomain, xRange);
-  const mphScale = d3.scaleLinear(mphDomain, yRange);
-  const ktScale = d3.scaleLinear(ktDomain, yRange);
-  const kmhScale = d3.scaleLinear(kmhDomain, yRange);
-  const xAxis = d3.axisBottom(xScale).ticks(widthGraph / 70).tickSizeOuter(0);
-  const ktAxis = d3.axisRight(ktScale).ticks(heightGraph / 20);
-  const kmhAxis = d3.axisRight(kmhScale).ticks(heightGraph / 20);
-  const dirScale = d3.scaleLinear(dirDomain, dirRange);
-  const cardinalScale = d3.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], dirRange);
-  const cardinalAxis = d3.axisRight(cardinalScale);
+  const xScale = d3Scale.scaleTime(xDomain, xRange);
+  const mphScale = d3Scale.scaleLinear(mphDomain, yRange);
+  const ktScale = d3Scale.scaleLinear(ktDomain, yRange);
+  const kmhScale = d3Scale.scaleLinear(kmhDomain, yRange);
+  const xAxis = d3Axis.axisBottom(xScale).ticks(widthGraph / 70).tickSizeOuter(0);
+  const ktAxis = d3Axis.axisRight(ktScale).ticks(heightGraph / 20);
+  const kmhAxis = d3Axis.axisRight(kmhScale).ticks(heightGraph / 20);
+  const dirScale = d3Scale.scaleLinear(dirDomain, dirRange);
+  const cardinalScale = d3Scale.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], dirRange);
+  const cardinalAxis = d3Axis.axisRight(cardinalScale);
 
-  const svg = d3.create("svg")
+  const svg = d3Selection.create("svg")
       .attr("width", width)
       // .attr("height", height)
       .attr("viewBox", [0, 0, width, heightTotal])
@@ -356,14 +361,14 @@ function graphWindStrength(site: Site, samples: Sample[], {
        .attr("height", heightGraph);
 
    // Define the current wind band (between each sample's low and high)
-   const windArea = d3.area<number>()
+   const windArea = d3Shape.area<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y0(i => mphScale(WindMinMph[i]))
        .y1(i => mphScale(WindMaxMph[i]));
 
    // Define the area below the current wind band
-   const windAreaBelow = d3.area<number>()
+   const windAreaBelow = d3Shape.area<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y0(mphScale(0))
@@ -427,7 +432,7 @@ function graphWindStrength(site: Site, samples: Sample[], {
        .attr("d", windArea(I));
 
    // Draw the weighted moving average of averages
-   const avgLine = d3.line<number>()
+   const avgLine = d3Shape.line<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y(i => mphScale(AvgMph[i]));
@@ -442,7 +447,7 @@ function graphWindStrength(site: Site, samples: Sample[], {
        .attr("d", avgLine(I));
 
    // Draw the recent peak line
-   const recentPeakLine = d3.line<number>()
+   const recentPeakLine = d3Shape.line<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y(i => mphScale(RecentPeakMph[i]));
@@ -457,7 +462,7 @@ function graphWindStrength(site: Site, samples: Sample[], {
        .attr("d", recentPeakLine(I));
 
    // Draw the recent lull line
-   const recentLullLine = d3.line<number>()
+   const recentLullLine = d3Shape.line<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y(i => mphScale(RecentLullMph[i]));
@@ -492,7 +497,7 @@ function graphWindStrength(site: Site, samples: Sample[], {
       .attr("transform", `translate(${xGraph + widthGraph},0)`)
       .call(cardinalAxis);
 
-   const dirLine = d3.line<number>()
+   const dirLine = d3Shape.line<number>()
        .curve(curve)
        .x(i => xScale(Time[i]))
        .y(i => dirScale(Dir[i]));
@@ -525,7 +530,7 @@ function filterLatestMinutes(samples: Sample[], minutesToShow: number): Sample[]
     const last = samples[samples.length - 1];
     const latestMs = last.time.getTime();
     const earliestMs = latestMs - minutesToMs(minutesToShow);
-    return d3.filter(samples, d => d.time.getTime() >= earliestMs);
+    return d3Array.filter(samples, d => d.time.getTime() >= earliestMs);
 }
 
 function formatHours(minutes: number): string {
@@ -569,7 +574,7 @@ export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt
 
         // For now we just remove the old graph and draw a new one.
         // It seems to be fast enough.
-        d3.select(graph).selectAll("svg").remove();
+        d3Selection.select(graph).selectAll("svg").remove();
         graph.append(svg);
     }
 
@@ -590,9 +595,9 @@ export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt
 
         if (samplesToRetrieve > 0) {
             console.log("Asking for " + samplesToRetrieve + " samples");
-            d3.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
+            d3Fetch.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
                 msLastUpdate = msNewUpdate;
-                addData(d3.map(newData as Iterable<SampleRaw>, parseSample));
+                addData(d3Array.map(newData as Iterable<SampleRaw>, parseSample));
                 updateGraph();
             });
         }
@@ -604,7 +609,7 @@ export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt
     minutesSlider?.addEventListener("input", handleMinutesChanged);
     function handleMinutesChanged(): void {
         minutesToShow = minutesSlider.valueAsNumber;
-        d3.select('#minutesToShowLabel').text("Showing " + formatHours(minutesToShow));
+        d3Selection.select('#minutesToShowLabel').text("Showing " + formatHours(minutesToShow));
         console.log("Minutes to show changed to: " + minutesToShow);
         updateGraph();
         pollSoon(uiUpdateIntervalMs);
