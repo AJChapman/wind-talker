@@ -1,14 +1,18 @@
 # Wind Talker Client-Side Rendering
 
-To use, load d3.html in a web browser.
-As a temporary measure during development it requires a local CORS proxy.
-To install this, follow the instructions at https://www.npmjs.com/package/local-cors-proxy and then start the proxy with `lcp --proxyUrl http://freeflightwx.com`.
- 
+To use:
 
-## TODO
+```bash
+npm i
+npm run build
+npm run proxy
+```
 
-- Local storage of previously retrieved data?
-- Logarithmic time scale? Recent values more spaced out, compressing as time passes.
-- Fill in gaps in data
-- Use typescript
-- Use MobX
+And in another console tab:
+
+```bash
+npm run server
+```
+
+Now navigate a browser to http://localhost:8080/d3.html
+
