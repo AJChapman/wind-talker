@@ -1,3 +1,4 @@
 node_modulesdist/
 node_modules/
 dist/
+ts-out/

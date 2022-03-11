@@ -2,6 +2,7 @@ import gulp from "gulp";
 import ts from "gulp-typescript";
 import browserify from "browserify";
 import babelify from "babelify";
+import watchify from "watchify";
 import source from "vinyl-source-stream";
 import fancy_log from "fancy-log";
 import sourcemaps from "gulp-sourcemaps";
@@ -41,11 +42,22 @@ export function typescripts() {
       .pipe(gulp.dest(paths.typescripts.dest));
 }
 
-function scripts() {
-    return browserify({
+var plainBrowserify = browserify({
         entries: paths.scripts.entries,
         debug: true,
-    }).transform(babelify, {
+    });
+
+var watchedBrowserify = browserify({
+        entries: paths.scripts.entries,
+        debug: true,
+        cache: {},
+        packageCache: {},
+        plugin: [watchify]
+    });
+
+function doScripts(b) {
+    return b
+      .transform(babelify, {
           global: true,
           only: [
               paths.scripts.src,
@@ -71,9 +83,20 @@ function scripts() {
       .pipe(gulp.dest(paths.scripts.dest));
 }
 
+function scripts() {
+    return doScripts(plainBrowserify);
+}
+
+function watchedScripts() {
+    return doScripts(watchedBrowserify);
+}
+
 function watchFiles() {
-    gulp.watch(paths.pages.src);
-    gulp.watch(paths.typescripts.src);
+    gulp.watch(paths.pages.src, pages);
+    gulp.watch(paths.typescripts.src, typescripts);
+    watchedBrowserify.on("update", watchedScripts);
+    watchedBrowserify.on("log", fancy_log);
+    gulp.parallel(pages, gulp.series(typescripts, watchedScripts));
 }
 export { watchFiles as watch };
 
