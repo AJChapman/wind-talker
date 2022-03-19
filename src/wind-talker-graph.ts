@@ -90,7 +90,7 @@ function mphToKt(mph: number): number { return mph * 0.8689758; }
 function mphToKmh(mph: number): number { return mph * 1.609344; }
 //function clamp(x: number, l: number, h: number): number { return Math.max(l, Math.min(h, x)); }
 function secondsToSamples(sec: number): number { return Math.floor(sec / sampleIntervalSecs); }
-function samplesToMs(samples: number): number { return samples * secondsToMs(sampleIntervalSecs); }
+// function samplesToMs(samples: number): number { return samples * secondsToMs(sampleIntervalSecs); }
 function msToSamples(ms: number): number { return Math.floor(ms / secondsToMs(sampleIntervalSecs)); }
 //function samplesToSeconds(n: number): number { return n * sampleIntervalSecs; }
 function secondsToMs(sec: number): number { return sec * 1000; }
@@ -544,7 +544,6 @@ function formatHours(minutes: number): string {
 
 export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt: HTMLElement, rawjsonurl: string) {
     let samples: Sample[] = [];
-    let msLastUpdate = 0;
     let minutesToShow = 60;
     let pollTimeout: number | null = null;
     const refreshIntervalMs = secondsToMs(refreshIntervalSecs);
@@ -561,8 +560,8 @@ export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt
         console.log(samples);
     }
 
-    function oldestDataTime() { return samples[0] ? samples[0].time : new Date(); }
-    function newestDataTime() { return samples.length > 0 ? samples[samples.length - 1].time : new Date(); }
+    // function oldestDataTime() { return samples[0] ? samples[0].time : new Date(); }
+    function newestDataTime() { return samples.length > 0 ? samples[samples.length - 1].time : new Date(0); }
 
     function updateGraph() {
         const samplesToShow = filterLatestMinutes(samples, minutesToShow);
@@ -586,17 +585,12 @@ export function windTalkerGraph(site: Site, graph: HTMLElement, minutesSliderElt
     function poll() {
         pollTimeout = null;
         const msNewUpdate = Date.now();
-        const msDataAvailable = newestDataTime().getTime() - oldestDataTime().getTime() + samplesToMs(2); // Add 2 samples to account for rounding
-        const msToShow = minutesToMs(minutesToShow);
-        const msDataToRetrieve = msToShow > msDataAvailable ? msToShow : 0;
-        const msNewToRetrieve = msNewUpdate - msLastUpdate;
-        const msToRetrieve = Math.min(msToShow, msDataToRetrieve + msNewToRetrieve) + 1;
-        const samplesToRetrieve = msToSamples(msToRetrieve);
+        const msNewestPrevious = newestDataTime().getTime();
+        const msNewToRetrieve = msNewUpdate - msNewestPrevious;
+        const samplesToRetrieve = msToSamples(msNewToRetrieve);
 
         if (samplesToRetrieve > 0) {
-            console.log("Asking for " + samplesToRetrieve + " samples");
-            d3Fetch.json(rawjsonurl + "?r=" + samplesToRetrieve).then(function(newData) {
-                msLastUpdate = msNewUpdate;
+            d3Fetch.json(rawjsonurl + "?latestMs=" + msNewUpdate + "&earliestMs=" + msNewestPrevious).then(function(newData) {
                 addData(d3Array.map(newData as Iterable<SampleRaw>, parseSample));
                 updateGraph();
             });
