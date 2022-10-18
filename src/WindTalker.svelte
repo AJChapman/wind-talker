@@ -4,7 +4,8 @@
     import * as d3Scale from 'd3-scale';
     import * as d3Shape from 'd3-shape';
 
-    import { onMount } from 'svelte'
+    import { onMount, tick } from 'svelte'
+    import VisibilityChange from 'svelte-visibility-change'
 
     import type { Site } from './site'
     import { fetchSamples } from './freeflightwx-fetch'
@@ -29,7 +30,8 @@
     const curve: d3Shape.CurveFactory = d3Shape.curveBumpX // method of interpolation between points
     const movingAverageAlpha: number = 0.05 // Lower is smoother, 1.0 is no smoothing
     const recentSecs: number = 600 // Duration considered in min/max/avg lines. 600 is 10 mins
-    const refreshIntervalMs = 1000
+    const visibleRefreshMs: number = 1000 // refresh every second when visible
+    const hiddenRefreshMs: number = 30000 // refresh every 30 seconds when invisible
 
     // Theme colours
     const colourDanger:      string = '#ff0000'
@@ -51,6 +53,9 @@
     const colourDirOff:      string = '#8c4521'
     const colourDir:         string = '#ffff00'
 
+    let visibility: "visible" | "hidden" = "visible"
+    $: visible = visibility == "visible"
+
     $: msToShow = minutesToMs(minutesToShow)
 
     let loadedSamples: Array<Sample> = new Array()
@@ -64,15 +69,7 @@
     $: msEarliestToShow = msNow - msToShow
 
     let visibleSamples: Array<Sample> = new Array()
-    $: {
-        visibleSamples = new Array()
-        if (loadedSamples.length > 0) {
-            const last = loadedSamples[loadedSamples.length - 1]
-            const latestMs = last.time.getTime()
-            const earliestMs = latestMs - msToShow
-            visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= earliestMs)
-        }
-    }
+    $: visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= msEarliestToShow)
 
     const xGraphs: number = margin.left
     const yStrengthGraph = margin.top
@@ -219,7 +216,7 @@
 
     // Trigger getMissingSamples() whenever msToShow changes
     async function getMissingSamples() {
-        const msBeforeLoaded = msEarliestLoadedSample - timeRange[0]
+        const msBeforeLoaded = msEarliestLoadedSample - msEarliestToShow
         if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {
             const newSamples = await fetchSamples(site, msEarliestToShow, msEarliestLoadedSample)
             addSamples(newSamples)
@@ -227,15 +224,28 @@
     }
 
     let updateTimeout: string | number | NodeJS.Timeout | null = null;
+
+    $: refreshIntervalMs = visible ? visibleRefreshMs : hiddenRefreshMs
+
+    $: {
+        // Change the timeout when refreshIntervalMs changes
+        clearTimeout(updateTimeout)
+        updateTimeout = setTimeout(update, refreshIntervalMs)
+    }
+
     onMount(() => update())
-    function update(): void {
+
+    async function update(): Promise<void> {
         clearTimeout(updateTimeout)
         getLatestSamples()
+        await tick()
         getMissingSamples()
+        await tick()
         updateTimeout = setTimeout(update, refreshIntervalMs)
     }
 </script>
 
+<VisibilityChange bind:state={visibility} />
 <svg {width} {height}>
     <!-- time axis -->
     <Axis x={0} y={yStrengthGraphBottom} axis={timeAxis} />

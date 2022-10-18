@@ -35,8 +35,9 @@
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.1.0",
-    "postcss": "^8.4.17",
+    "postcss": "^8.4.18",
     "safety-match": "^0.4.4",
+    "svelte-visibility-change": "^0.6.0",
     "tailwindcss": "^3.1.8"
   }
 }
