@@ -2,7 +2,11 @@
 module.exports = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
-    extend: {},
+    extend: {
+        fontFamily: {
+            'sans': ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif']
+        },
+    },
   },
   plugins: [],
 }
