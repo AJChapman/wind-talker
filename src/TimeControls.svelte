@@ -14,7 +14,7 @@
 
 </script>
 
-<div class="w-full md:px-4 px-1 pb-0 mt-2">
+<div class="w-full pb-0 mt-2">
     <label class="w-full font-medium" for="minutesToShow" id="minutesToShowLabel">Showing {timeText}</label>
     <input class="w-full" bind:value={minutesToShow} type="range" min="10" max="1440" id="minutesToShow" style="direction: rtl;"/>
     <button class="{minutesToShow == 60 ? 'enabled' : ''}" on:click={() => minutesToShow = 60}>1 hour</button>
