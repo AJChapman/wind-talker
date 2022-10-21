@@ -7,7 +7,7 @@
 </script>
 
 <main class="md:m-4 m-1">
-    <a href="/">
+    <a href="{import.meta.env.BASE_URL}">
         <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>
     </a>
 
