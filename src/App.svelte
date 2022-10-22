@@ -13,8 +13,10 @@
 
     <TimeControls bind:minutesToShow />
     <WindTalkerListing site={springHill} {minutesToShow} />
+        <!--
     <WindTalkerListing site={lakeGeorge} {minutesToShow} />
     <WindTalkerListing site={lanyon} {minutesToShow} />
+        -->
 </main>
 
 <style>
