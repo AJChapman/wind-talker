@@ -1,4 +1,5 @@
 import * as d3Fetch from 'd3-fetch';
+import { backOff } from 'exponential-backoff'
 
 import type { Site } from './site'
 import type { Sample } from './sample'
@@ -11,9 +12,23 @@ const baseUrl = (import.meta.env.MODE == 'development') ? 'http://localhost:8010
 const script = 'fetch.php'
 
 // If msTo is undefined fetches the latest
-export async function fetchSamples(site: Site, msFrom: number, msTo: number | undefined = undefined): Promise<Array<Sample>> {
+async function fetchSamples(site: Site, msFrom: number, msTo: number | undefined = undefined): Promise<Array<Sample>> {
     const url = baseUrl + '/' + script + '?site=' + site.folder + '&fromMs=' + msFrom + (msTo !== undefined ? ('&toMs=' + msTo) : '')
-    let raw: Array<SampleRaw> = await d3Fetch.json(url)
+    const raw: Array<SampleRaw> = await d3Fetch.json(url)
+    if (raw.length == 0) throw(`fetchSamples got no samples; site: '${site.name}' msFrom: '${msFrom}' msTo: '${msTo}'`)
     return raw.map(parseSample)
 }
 
+export async function fetchSamplesBackoff(site: Site, msFrom: number, msTo: number | undefined = undefined): Promise<Array<Sample>> {
+    try {
+        return backOff(() => fetchSamples(site, msFrom, msTo),
+            { jitter: "full" // So many clients don't rhythmically whack the server
+            , maxDelay: 60000 // 60 seconds
+            , numOfAttempts: Infinity // Keep on trying
+            , startingDelay: 1000 // Wait a second after the first attempt returns no results
+            })
+    } catch (e) {
+        console.log("fetchSamplesBackoff failed to fetch samples: " + e)
+        return []
+    }
+}
