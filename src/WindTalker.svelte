@@ -22,7 +22,7 @@
     export let minutesToShow: number
 
     // Settings
-    const margin: Margin = { left: 20, right: 20, top: 30, bottom: 20 }
+    const margin: Margin = { left: 10, right: 10, top: 23, bottom: 10 }
     const widthKt = 20
     const widthKmh = 30
     const yBetweenGraphs = 25
@@ -246,9 +246,9 @@
 
     <!-- kt and kmh axes and labels -->
     <Axis x={xGraphs + widthGraph} y={0} axis={kmhAxis} />
-    <text x={xGraphs + widthGraph} y={margin.top - 10} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kmh</text>
+    <text x={xGraphs + widthGraph} y={margin.top - 7} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kmh</text>
     <Axis x={xGraphs + widthGraph + widthKmh} y={0} axis={ktAxis} />
-    <text x={xGraphs + widthGraph + widthKmh} y={margin.top - 10} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kt</text>
+    <text x={xGraphs + widthGraph + widthKmh} y={margin.top - 7} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kt</text>
 
     <!-- clip paths -->
     <clipPath id="clip-graphs">
