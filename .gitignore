@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+/.svelte-kit
+/package
+/build
 
 # Editor directories and files
 .vscode/*
@@ -22,4 +25,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-public/secrets.php
+
+# Wind-talker-specific
+static/secrets.php
