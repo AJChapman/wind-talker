@@ -1,8 +1,14 @@
-import type { Site } from './site'
+import type { Site, SiteGroup } from './site'
+
+export const acthpa: SiteGroup =
+    { name: 'ACTHPA'
+    , path: 'acthpa'
+    }
 
 export const springHill: Site =
     { name:             'Spring Hill'
-    , folder:           'acthpa/springhill'
+    , group:            acthpa
+    , path:             'springhill'
     , timezone:         'Australia/Sydney'
     , speedLowMph:      13
     , speedOnMph:       18
@@ -16,7 +22,8 @@ export const springHill: Site =
 
 export const lakeGeorge: Site =
     { name:             'Lake George'
-    , folder:           'acthpa/lakegeorge'
+    , group:            acthpa
+    , path:             'lakegeorge'
     , timezone:         'Australia/Sydney'
     , speedLowMph:      8
     , speedOnMph:       15
@@ -30,7 +37,8 @@ export const lakeGeorge: Site =
 
 export const lanyon: Site =
     { name:             'Lanyon (Big Monks)'
-    , folder:           'acthpa/lanyon'
+    , group:            acthpa
+    , path:             'lanyon'
     , timezone:         'Australia/Sydney'
     , speedLowMph:      8
     , speedOnMph:       13
