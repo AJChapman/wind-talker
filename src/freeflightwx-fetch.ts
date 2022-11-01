@@ -2,7 +2,6 @@ import * as d3Fetch from 'd3-fetch';
 import { backOff } from 'exponential-backoff'
 
 import type { Site } from './site'
-import { sitePath } from './site'
 import type { Sample } from './sample'
 import type { SampleRaw } from './freeflightwx-db'
 import { parseSample } from './sample'
@@ -14,7 +13,7 @@ const script = 'fetch.php'
 
 // If msTo is undefined fetches the latest
 async function fetchSamples(site: Site, msFrom: number, msTo: number | undefined = undefined): Promise<Array<Sample>> {
-    const url = baseUrl + '/' + script + '?site=' + sitePath(site) + '&fromMs=' + msFrom + (msTo !== undefined ? ('&toMs=' + msTo) : '')
+    const url = baseUrl + '/' + script + '?site=' + site.path + '&fromMs=' + msFrom + (msTo !== undefined ? ('&toMs=' + msTo) : '')
     const raw: Array<SampleRaw> | undefined = await d3Fetch.json(url)
     if (raw === undefined || raw.length == 0) throw(`fetchSamples got no samples; site: '${site.name}' msFrom: '${msFrom}' msTo: '${msTo}'`)
     return raw.map(parseSample)

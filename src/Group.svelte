@@ -1,0 +1,25 @@
+<script lang="ts">
+    import WindTalkerListing from '$lib/WindTalkerListing.svelte'
+    import Link from '$lib/Link.svelte'
+    import type { Site, SiteGroup } from '$lib/site'
+    import TimeControls from '$lib/TimeControls.svelte'
+
+    export let group: SiteGroup
+    export let sites: Array<Site>
+    export let minutesToShow: number = 60
+</script>
+
+<svelte:head>
+    <title>{group.name} Wind Talkers</title>
+</svelte:head>
+
+<main class="md:m-4 m-1">
+    <Link path="">
+        <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>
+    </Link>
+
+    <TimeControls bind:minutesToShow />
+    {#each sites as site}
+        <WindTalkerListing {site} {minutesToShow} />
+    {/each}
+</main>
