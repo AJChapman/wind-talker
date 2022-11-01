@@ -1,14 +1,14 @@
 import * as d3Fetch from 'd3-fetch';
 import { backOff } from 'exponential-backoff'
 
+import { base } from '$app/paths'
+
 import type { Site } from './site'
 import type { Sample } from './sample'
 import type { SampleRaw } from './freeflightwx-db'
 import { parseSample } from './sample'
 
-const baseUrl = (import.meta.env.MODE == 'development') ? 'http://localhost:8010/proxy/new' : '/new'
-// const baseUrl = 'http://freeflightwx.com'
-
+const baseUrl = `http://freeflightwx.com/${base}`
 const script = 'fetch.php'
 
 // If msTo is undefined fetches the latest
