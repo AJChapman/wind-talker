@@ -4,6 +4,7 @@
     import Link from './Link.svelte'
 
     export let site: Site
+    export let date: Date | undefined
     export let minutesToShow: number
 
     let graphWidth: number
@@ -15,6 +16,6 @@
         <h1 class="font-sans text-[#337ab7] font-medium text-2xl hover:underline mb-2">{site.name}</h1>
     </Link>
     <div class="grow w-full border" bind:offsetWidth={graphWidth} bind:offsetHeight={graphHeight}>
-        <WindTalker {site} width={graphWidth} height={graphHeight - 5} {minutesToShow} />
+        <WindTalker {site} width={graphWidth} height={graphHeight - 5} {date} {minutesToShow} />
     </div>
 </div>

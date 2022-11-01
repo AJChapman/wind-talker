@@ -5,6 +5,7 @@
     import TimeControls from '$lib/TimeControls.svelte'
 
     export let site: Site
+    export let date: Date | undefined = undefined
     export let minutesToShow: number = 60
 </script>
 
@@ -22,8 +23,8 @@
         </Link>
     {/if}
 
-    <TimeControls bind:minutesToShow />
-    <WindTalkerListing {site} {minutesToShow} />
+    <TimeControls bind:date bind:minutesToShow />
+    <WindTalkerListing {site} {date} {minutesToShow} />
 </main>
 
 <style>

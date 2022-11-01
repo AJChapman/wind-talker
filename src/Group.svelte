@@ -6,7 +6,8 @@
 
     export let group: SiteGroup
     export let sites: Array<Site>
-    export let minutesToShow: number = 60
+    let date: Date | undefined = undefined
+    let minutesToShow: number = 60
 </script>
 
 <svelte:head>
@@ -18,8 +19,8 @@
         <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>
     </Link>
 
-    <TimeControls bind:minutesToShow />
+    <TimeControls bind:date bind:minutesToShow />
     {#each sites as site}
-        <WindTalkerListing {site} {minutesToShow} />
+        <WindTalkerListing {site} {date} {minutesToShow} />
     {/each}
 </main>

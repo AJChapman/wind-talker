@@ -13,6 +13,8 @@ const script = 'fetch.php'
 
 // If msTo is undefined fetches the latest
 async function fetchSamples(site: Site, msFrom: number, msTo: number | undefined = undefined): Promise<Array<Sample>> {
+    // if (msTo === undefined) console.log("fetchSamples() from: " + new Date(msFrom))
+    // else console.log("fetchSamples() from: " + new Date(msFrom) + " to: " + new Date(msTo))
     const url = baseUrl + '/' + script + '?site=' + site.path + '&fromMs=' + msFrom + (msTo !== undefined ? ('&toMs=' + msTo) : '')
     const raw: Array<SampleRaw> | undefined = await d3Fetch.json(url)
     if (raw === undefined || raw.length == 0) throw(`fetchSamples got no samples; site: '${site.name}' msFrom: '${msFrom}' msTo: '${msTo}'`)
