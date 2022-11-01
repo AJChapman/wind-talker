@@ -31,6 +31,7 @@
     <DateInput bind:value={date} placeholder={"current"} format={"yyyy-MM-dd"} max={new Date(Date.now())} />
     <label class="w-full font-medium" for="minutesToShow" id="minutesToShowLabel">Showing {timeText}</label>
     <input class="w-full" bind:value={minutesToShow} type="range" min="10" max="1440" id="minutesToShow" style="direction: rtl;"/>
+    <button class="{minutesToShow == 10 ? 'enabled' : ''}" on:click={() => setCurrent(10)}>10 mins</button>
     <button class="{minutesToShow == 60 ? 'enabled' : ''}" on:click={() => setCurrent(60)}>1 hour</button>
     <button class="{minutesToShow == 4 * 60 ? 'enabled' : ''}" on:click={() => setCurrent(4 * 60)}>4 hours</button>
     <button class="{minutesToShow == 12 * 60 ? 'enabled' : ''}" on:click={() => setCurrent(12 * 60)}>12 hours</button>
@@ -39,7 +40,7 @@
 
 <style type="text/postcss">
     button {
-        @apply bg-gray-500 text-white font-bold py-1 px-2 rounded shadow hover:bg-blue-400 text-sm;
+        @apply bg-gray-500 text-white font-bold mt-1 py-1 px-2 rounded shadow hover:bg-blue-400 text-sm;
     }
 
     .enabled {

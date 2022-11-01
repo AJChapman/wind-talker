@@ -11,7 +11,7 @@
     let graphHeight: number
 </script>
 
-<div class="w-full flex flex-col h-96 my-4">
+<div class="w-full flex flex-col h-80 lg:h-96 my-4">
     <Link classes="flex-none" path={site.path}>
         <h1 class="font-sans text-[#337ab7] font-medium text-2xl hover:underline mb-2">{site.name}</h1>
     </Link>
