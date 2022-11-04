@@ -14,6 +14,7 @@
     import Axis from './Axis.svelte'
     import type { Margin } from './margin'
     import { mphToKt, mphToKmh, minutesToMs, msToSamples, secondsToSamples, secondsToMs } from './conversion'
+    import { formatDate, formatDateTime } from './date'
 
     // Component parameters
     export let site: Site
@@ -55,6 +56,17 @@
     const colourDirOn:       string = '#008100'
     const colourDirOff:      string = '#8c4521'
     const colourDir:         string = '#ffff00'
+
+    function formatHours(minutes: number): string {
+        const minutesNumber = minutes % 60
+        const minutesText = minutesNumber == 0 ? "" : (minutesNumber + (minutesNumber == 1 ? " minute" : " minutes"))
+        if (minutes < 60) return minutesText
+        const hourNumber = Math.floor(minutes / 60)
+        if (hourNumber == 1) return hourNumber + " hour" + (minutesText == "" ? "" : ", " + minutesText)
+        return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText)
+    }
+
+    $: timeText = date ? formatDate(date) : 'last ' + formatHours(minutesToShow)
 
     let visibility: "visible" | "hidden" = "visible"
     $: visible = visibility == "visible"
@@ -273,6 +285,11 @@
     <text x={xGraphs + widthGraph} y={margin.top - 7} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kmh</text>
     <Axis x={xGraphs + widthGraph + widthKmh} y={0} axis={ktAxis} />
     <text x={xGraphs + widthGraph + widthKmh} y={margin.top - 7} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kt</text>
+
+    <text x={xGraphs} y={margin.top - 5} font-size="small">{site.name}: {timeText}</text>
+    {#if !date}
+        <text x={xGraphs + widthGraph - 200} y={margin.top - 5} font-size="small">{formatDateTime(new Date(msNow))}</text>
+    {/if}
 
     <!-- clip paths -->
     <clipPath id="clip-graphs">

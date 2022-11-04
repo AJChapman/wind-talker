@@ -9,17 +9,6 @@
         if (date) minutesToShow = 24 * 60
     }
 
-    $: timeText = formatHours(minutesToShow)
-
-    function formatHours(minutes: number): string {
-        const minutesNumber = minutes % 60
-        const minutesText = minutesNumber == 0 ? "" : (minutesNumber + (minutesNumber == 1 ? " minute" : " minutes"))
-        if (minutes < 60) return minutesText
-        const hourNumber = Math.floor(minutes / 60)
-        if (hourNumber == 1) return hourNumber + " hour" + (minutesText == "" ? "" : ", " + minutesText)
-        return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText)
-    }
-
     function setCurrent(minutes: number): void {
         date = null
         minutesToShow = minutes
@@ -29,7 +18,6 @@
 
 <div class="w-full pb-0 mt-2">
     <DateInput bind:value={date} placeholder={"current"} format={"yyyy-MM-dd"} max={new Date(Date.now())} />
-    <label class="w-full font-medium" for="minutesToShow" id="minutesToShowLabel">Showing {timeText}</label>
     <input class="w-full" bind:value={minutesToShow} type="range" min="10" max="1440" id="minutesToShow" style="direction: rtl;"/>
     <button class="{minutesToShow == 10 ? 'enabled' : ''}" on:click={() => setCurrent(10)}>10 mins</button>
     <button class="{minutesToShow == 60 ? 'enabled' : ''}" on:click={() => setCurrent(60)}>1 hour</button>

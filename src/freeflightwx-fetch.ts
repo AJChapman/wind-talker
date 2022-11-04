@@ -8,7 +8,7 @@ import type { Sample } from './sample'
 import type { SampleRaw } from './freeflightwx-db'
 import { parseSample } from './sample'
 
-const baseUrl = `http://freeflightwx.com/${base}`
+const baseUrl = `//freeflightwx.com${base}`
 const script = 'fetch.php'
 
 // If msTo is undefined fetches the latest
