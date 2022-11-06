@@ -146,8 +146,8 @@
     $: ktDomain = [0, mphToKt(graphMaxMph)]
     $: kmhDomain = [0, mphToKmh(graphMaxMph)]
     const dirDomain = [0, 359] // degrees
-    $: dirStartDeg = site.dirOnDeg - site.dirWidthDeg / 2
-    $: dirEndDeg = site.dirOnDeg + site.dirWidthDeg / 2
+    $: dirStartDeg = site.dirOnDeg - site.dirWidthDeg
+    $: dirEndDeg = site.dirOnDeg + site.dirWidthDeg
     $: dirScale = d3Scale.scaleLinear(dirDomain, yDirectionRange)
     $: cardinalScale = d3Scale.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], yDirectionRange)
 
@@ -159,6 +159,18 @@
     $: ktAxis = d3Axis.axisRight(ktScale).ticks(heightStrengthGraph / 20)
     $: kmhAxis = d3Axis.axisRight(kmhScale).ticks(heightStrengthGraph / 20)
     $: cardinalAxis = d3Axis.axisRight(cardinalScale)
+
+    $: yLow = mphScale(site.speedLowMph)
+    $: yOn = mphScale(site.speedOnMph)
+    $: console.log(yOn)
+    $: yMarginal = mphScale(site.speedMarginalMph)
+    $: yDanger = mphScale(graphMaxMph)
+
+    $: hLow = yStrengthGraphBottom - yLow
+    $: hOn = yLow - yOn
+    $: console.log(hOn)
+    $: hMarginal = yOn - yMarginal
+    $: hDanger = yMarginal - yDanger
 
     // Define the current wind band (between each sample's low and high)
     $: windArea = d3Shape.area<number>()
@@ -276,7 +288,16 @@
 
 <VisibilityChange bind:state={visibility} />
 {#if width !== undefined && height !== undefined}
-<svg {width} {height}>
+<svg {width} {height} viewBox="0 0 {width} {height}">
+    <defs>
+        <!-- clip paths -->
+        <clipPath id="clip-graphs-{site.path}">  <rect x={xGraphs} width={widthGraph} y={0}         height={height} /></clipPath>
+        <clipPath id="clip-low-{site.path}">     <rect x={xGraphs} width={widthGraph} y={yLow}      height={hLow} /></clipPath>
+        <clipPath id="clip-on-{site.path}">      <rect x={xGraphs} width={widthGraph} y={yOn}       height={hOn} /></clipPath>
+        <clipPath id="clip-marginal-{site.path}"><rect x={xGraphs} width={widthGraph} y={yMarginal} height={hMarginal} /></clipPath>
+        <clipPath id="clip-danger-{site.path}">  <rect x={xGraphs} width={widthGraph} y={yDanger}   height={hDanger} /></clipPath>
+    </defs>
+
     <!-- time axis -->
     <Axis x={0} y={yStrengthGraphBottom} axis={timeAxis} />
 
@@ -291,50 +312,33 @@
         <text x={xGraphs + widthGraph - 200} y={margin.top - 5} font-size="small">{formatDateTime(new Date(msNow))}</text>
     {/if}
 
-    <!-- clip paths -->
-    <clipPath id="clip-graphs">
-        <rect x={xGraphs} y={0} width={widthGraph} height={height} />
-    </clipPath>
-    <clipPath id="clip-low">
-        <rect x={xGraphs} y={mphScale(site.speedLowMph)} width={widthGraph} height={mphScale(0) - mphScale(site.speedLowMph)} />
-    </clipPath>
-    <clipPath id="clip-on">
-        <rect x={xGraphs} y={mphScale(site.speedOnMph)} width={widthGraph} height={mphScale(site.speedLowMph) - mphScale(site.speedOnMph)} />
-    </clipPath>
-    <clipPath id="clip-marginal">
-        <rect x={xGraphs} y={mphScale(site.speedMarginalMph)} width={widthGraph} height={mphScale(site.speedOnMph) - mphScale(site.speedMarginalMph)} />
-    </clipPath>
-    <clipPath id="clip-danger">
-        <rect x={xGraphs} y={mphScale(graphMaxMph)} width={widthGraph} height={mphScale(site.speedMarginalMph) - mphScale(graphMaxMph)} />
-    </clipPath>
-
     <!-- zone backgrounds -->
-    <rect x={xGraphs} y={0} width={widthGraph} height={heightStrengthGraph} fill={colourDangerBg} clip-path="url(#clip-danger)" />
-    <rect x={xGraphs} y={0} width={widthGraph} height={heightStrengthGraph} fill={colourMarginalBg} clip-path="url(#clip-marginal)" />
-    <rect x={xGraphs} y={0} width={widthGraph} height={heightStrengthGraph} fill={colourOnBg} clip-path="url(#clip-on)" />
-    <rect x={xGraphs} y={0} width={widthGraph} height={heightStrengthGraph} fill={colourLowBg} clip-path="url(#clip-low)" />
+    <rect x={xGraphs} width={widthGraph} y={yLow}      height={hLow}      fill={colourLowBg} />
+    <rect x={xGraphs} width={widthGraph} y={yOn}       height={hOn}       fill={colourOnBg} />
+    <rect x={xGraphs} width={widthGraph} y={yMarginal} height={hMarginal} fill={colourMarginalBg} />
+    <rect x={xGraphs} width={widthGraph} y={yDanger}   height={hDanger}   fill={colourDangerBg} />
 
     <!-- zones -->
-    <path fill={colourLowMid} stroke="none" clip-path="url(#clip-low)" d={windAreaBelow} />
-    <path fill={colourLow} stroke="none" clip-path="url(#clip-low)" d={windArea} />
-    <path fill={colourOnMid} stroke="none" clip-path="url(#clip-on)" d={windAreaBelow} />
-    <path fill={colourOn} stroke="none" clip-path="url(#clip-on)" d={windArea} />
-    <path fill={colourMarginalMid} stroke="none" clip-path="url(#clip-marginal)" d={windAreaBelow} />
-    <path fill={colourMarginal} stroke="none" clip-path="url(#clip-marginal)" d={windArea} />
-    <path fill={colourDangerMid} stroke="none" clip-path="url(#clip-danger)" d={windAreaBelow} />
-    <path fill={colourDanger} stroke="none" clip-path="url(#clip-danger)" d={windArea} />
+    <path fill={colourLowMid}      stroke="none" clip-path="url(#clip-low-{site.path})"      d={windAreaBelow} />
+    <path fill={colourLow}         stroke="none" clip-path="url(#clip-low-{site.path})"      d={windArea} />
+    <path fill={colourOnMid}       stroke="none" clip-path="url(#clip-on-{site.path})"       d={windAreaBelow} />
+    <path fill={colourOn}          stroke="none" clip-path="url(#clip-on-{site.path})"       d={windArea} />
+    <path fill={colourMarginalMid} stroke="none" clip-path="url(#clip-marginal-{site.path})" d={windAreaBelow} />
+    <path fill={colourMarginal}    stroke="none" clip-path="url(#clip-marginal-{site.path})" d={windArea} />
+    <path fill={colourDangerMid}   stroke="none" clip-path="url(#clip-danger-{site.path})"   d={windAreaBelow} />
+    <path fill={colourDanger}      stroke="none" clip-path="url(#clip-danger-{site.path})"   d={windArea} />
 
     <!-- recent lines (average, peak, lull) -->
-    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourAvg} stroke-width={1.5} d={avgLine} />
-    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourPeak} stroke-width={1.5} d={recentPeakLine} />
-    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourLull} stroke-width={1.5} d={recentLullLine} />
+    <path fill="none" clip-path="url(#clip-graphs-{site.path})" stroke={colourAvg}  stroke-width={1.5} d={avgLine} />
+    <path fill="none" clip-path="url(#clip-graphs-{site.path})" stroke={colourPeak} stroke-width={1.5} d={recentPeakLine} />
+    <path fill="none" clip-path="url(#clip-graphs-{site.path})" stroke={colourLull} stroke-width={1.5} d={recentLullLine} />
 
     <!-- direction graph -->
     <rect fill={colourDirOff} x={xGraphs} y={yDirectionGraph}       width={widthGraph} height={heightDirectionGraph} />
     <rect fill={colourDirOn}  x={xGraphs} y={dirScale(dirStartDeg)} width={widthGraph} height={dirScale(dirEndDeg) - dirScale(dirStartDeg)} />
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
     {#each visibleSamples as sample}
-        <circle clip-path="url(#clip-graphs)" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
+        <circle clip-path="url(#clip-graphs-{site.path})" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
     {/each}
 </svg>
 {/if}

@@ -15,7 +15,7 @@ export const springhill: Site =
     , speedMarginalMph: 22
     , speedMaxMph: 150 // max recordable wind speed to cancel out electrical interference
     , dirOnDeg: 280
-    , dirWidthDeg: 90
+    , dirWidthDeg: 45
     , altitudeFt: 2870
     , dirAdjust: 0
     }
@@ -30,7 +30,7 @@ export const lakegeorge: Site =
     , speedMarginalMph: 18
     , speedMaxMph: 150
     , dirOnDeg: 80
-    , dirWidthDeg: 90
+    , dirWidthDeg: 45
     , altitudeFt: 2185
     , dirAdjust: 0
     }
@@ -45,7 +45,7 @@ export const lanyon: Site =
     , speedMarginalMph: 20
     , speedMaxMph: 150
     , dirOnDeg: 280
-    , dirWidthDeg: 90
+    , dirWidthDeg: 45
     , altitudeFt: 2970
     , dirAdjust: 0
     }
