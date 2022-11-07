@@ -253,3 +253,171 @@ function groupSites(group: SiteGroup, sites: Array<Site>): Array<Site> {
 export const acthpaSites = groupSites(acthpa, allSites)
 export const nevicSites = groupSites(nevic, allSites)
 export const svicSites = groupSites(svic, allSites)
+
+// Unlisted sites
+
+export const eclipselx: Site =
+    { name: 'eclipselx'
+    , group: undefined
+    , path: 'eclipselx'
+    , timezone: 'Australia/Melbourne'
+    , speedLowMph: 0
+    , speedOnMph: 31
+    , speedMarginalMph: 46.6
+    , speedMaxMph: 150
+    , dirOnDeg: 0
+    , dirWidthDeg: 1
+    , altitudeFt: 1845
+    , dirAdjust: 0
+    }
+
+export const eclipselx2: Site =
+    { name: 'eclipselx2'
+    , group: undefined
+    , path: 'eclipselx2'
+    , timezone: 'Australia/Melbourne'
+    , speedLowMph: 0
+    , speedOnMph: 31
+    , speedMarginalMph: 46.6
+    , speedMaxMph: 150
+    , dirOnDeg: 0
+    , dirWidthDeg: 1
+    , altitudeFt: 1845
+    , dirAdjust: 0
+    }
+
+export const eclipselx3: Site =
+    { name: 'eclipselx3'
+    , group: undefined
+    , path: 'eclipselx3'
+    , timezone: 'Australia/Melbourne'
+    , speedLowMph: 1
+    , speedOnMph: 12
+    , speedMarginalMph: 14
+    , speedMaxMph: 150
+    , dirOnDeg: 350
+    , dirWidthDeg: 40
+    , altitudeFt: 2615
+    , dirAdjust: 0
+    }
+
+export const hooleydooley: Site =
+    { name: 'Hooley Dooley'
+    , group: undefined
+    , path: 'hooleydooley'
+    , timezone: 'Australia/Melbourne'
+    , speedLowMph: 3
+    , speedOnMph: 12
+    , speedMarginalMph: 18
+    , speedMaxMph: 150
+    , dirOnDeg: 95
+    , dirWidthDeg: 40
+    , altitudeFt: 1155
+    , dirAdjust: 110
+    }
+
+export const lakestclaire: Site =
+    { name: 'Lake St Claire'
+    , group: undefined
+    , path: 'lakestclaire'
+    , timezone: 'Australia/Sydney'
+    , speedLowMph: 1
+    , speedOnMph: 12
+    , speedMarginalMph: 14
+    , speedMaxMph: 150
+    , dirOnDeg: 350
+    , dirWidthDeg: 40
+    , altitudeFt: 2615
+    , dirAdjust: 0
+    }
+
+export const softys: Site =
+    { name: 'Softys'
+    , group: undefined
+    , path: 'softys'
+    , timezone: 'Australia/Sydney'
+    , speedLowMph: 1
+    , speedOnMph: 12
+    , speedMarginalMph: 14
+    , speedMaxMph: 150
+    , dirOnDeg: 350
+    , dirWidthDeg: 40
+    , altitudeFt: 2615
+    , dirAdjust: 0
+    }
+
+export const stringybark: Site =
+    { name: 'Stringybark'
+    , group: undefined
+    , path: 'stringybark'
+    , timezone: 'Australia/Brisbane'
+    , speedLowMph: 3
+    , speedOnMph: 10
+    , speedMarginalMph: 15
+    , speedMaxMph: 150
+    , dirOnDeg: 90
+    , dirWidthDeg: 90
+    , altitudeFt: 1440
+    , dirAdjust: 0
+    }
+
+export const temp: Site =
+    { name: 'Temporary'
+    , group: undefined
+    , path: 'temp'
+    , timezone: 'Australia/Melbourne'
+    , speedLowMph: 1
+    , speedOnMph: 13
+    , speedMarginalMph: 16
+    , speedMaxMph: 150
+    , dirOnDeg: 165
+    , dirWidthDeg: 40
+    , altitudeFt: 1845
+    , dirAdjust: 0
+    }
+
+export const test: Site =
+    { name: 'Test'
+    , group: undefined
+    , path: 'test'
+    , timezone: 'Australia/Melbourne'
+    , speedLowMph: 1
+    , speedOnMph: 12
+    , speedMarginalMph: 14
+    , speedMaxMph: 150
+    , dirOnDeg: 350
+    , dirWidthDeg: 40
+    , altitudeFt: 2615
+    , dirAdjust: 0
+    }
+
+export const winton: Site =
+    { name: 'Winton'
+    , group: undefined
+    , path: 'winton'
+    , timezone: 'Australia/Hobart'
+    , speedLowMph: 8
+    , speedOnMph: 13.8
+    , speedMarginalMph: 18
+    , speedMaxMph: 150
+    , dirOnDeg: 146.25
+    , dirWidthDeg: 33.75
+    , altitudeFt: 600
+    , dirAdjust: -8
+    }
+
+export const woodstock: Site =
+    { name: 'Woodstock'
+    , group: undefined
+    , path: 'woodstock'
+    , timezone: 'America/New_York'
+    , speedLowMph: 1
+    , speedOnMph: 12
+    , speedMarginalMph: 14
+    , speedMaxMph: 150
+    , dirOnDeg: 350
+    , dirWidthDeg: 40
+    , altitudeFt: 2615
+    , dirAdjust: 0
+    }
+

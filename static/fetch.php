@@ -17,7 +17,18 @@
        'mtbroughton' => 'mtbroughton',
        'pops' => 'pops',
        'tunk' => 'tunk',
-       'kurutake' => 'kurutake'
+       'kurutake' => 'kurutake',
+       'eclipselx' => 'eclipselx',
+       'eclipselx2' => 'eclipselx2',
+       'eclipselx3' => 'eclipselx3',
+       'hooleydooley' => 'hooleydooley',
+       'lakestclaire' => 'lakestclaire',
+       'softys' => 'softys',
+       'stringybark' => 'stringybark',
+       'temp' => 'temp',
+       'test' => 'test',
+       'winton' => 'winton',
+       'woodstock'
     );
 
     if (!array_key_exists($_GET['site'], $data_tables)) {
