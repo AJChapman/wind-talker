@@ -290,11 +290,11 @@
 <svg {width} {height} viewBox="0 0 {width} {height}">
     <defs>
         <!-- clip paths -->
-        <clipPath id="clip-graphs-{site.path}">  <rect x={xGraphs} width={widthGraph} y={0}         height={height} /></clipPath>
-        <clipPath id="clip-low-{site.path}">     <rect x={xGraphs} width={widthGraph} y={yLow}      height={hLow} /></clipPath>
-        <clipPath id="clip-on-{site.path}">      <rect x={xGraphs} width={widthGraph} y={yOn}       height={hOn} /></clipPath>
-        <clipPath id="clip-marginal-{site.path}"><rect x={xGraphs} width={widthGraph} y={yMarginal} height={hMarginal} /></clipPath>
-        <clipPath id="clip-danger-{site.path}">  <rect x={xGraphs} width={widthGraph} y={yDanger}   height={hDanger} /></clipPath>
+        <clipPath id="clip-graphs-{site.path}">  <rect x={xGraphs} width={widthGraph} y={margin.top} height={heightGraphs} /></clipPath>
+        <clipPath id="clip-low-{site.path}">     <rect x={xGraphs} width={widthGraph} y={yLow}       height={hLow} /></clipPath>
+        <clipPath id="clip-on-{site.path}">      <rect x={xGraphs} width={widthGraph} y={yOn}        height={hOn} /></clipPath>
+        <clipPath id="clip-marginal-{site.path}"><rect x={xGraphs} width={widthGraph} y={yMarginal}  height={hMarginal} /></clipPath>
+        <clipPath id="clip-danger-{site.path}">  <rect x={xGraphs} width={widthGraph} y={yDanger}    height={hDanger} /></clipPath>
     </defs>
 
     <!-- time axis -->
