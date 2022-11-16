@@ -3,9 +3,12 @@
     import Link from '$lib/Link.svelte'
     import type { Site, SiteGroup } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
+    import { groupSites } from '$lib/freeflightwx-sites'
 
     export let group: SiteGroup
-    export let sites: Array<Site>
+
+    $: sites = groupSites(group)
+
     let date: Date | undefined = undefined
     let minutesToShow: number = 60
 </script>
