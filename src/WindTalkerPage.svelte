@@ -21,7 +21,7 @@
     <title>{site.name} Wind Talker</title>
 </svelte:head>
 
-<main class="md:m-4 m-1">
+<main class="{compact ? "" : "md:m-4 m-1"}">
     {#if !compact}
         <Link path="">
             <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>

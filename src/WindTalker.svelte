@@ -150,7 +150,7 @@
     $: dirStartDegs = site.directions.map(d => d.centerDeg - d.halfWidthDeg)
     $: dirEndDegs = site.directions.map(d => d.centerDeg + d.halfWidthDeg)
     $: dirScale = d3Scale.scaleLinear(dirDomain, yDirectionRange)
-    $: cardinalScale = d3Scale.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], yDirectionRange)
+    $: cardinalScale = d3Scale.scalePoint(["N", "E", "S", "W", ""], yDirectionRange)
 
     $: xScale = d3Scale.scaleTime().domain(timeRange).range(xRange)
     $: ktScale = d3Scale.scaleLinear(ktDomain, yStrengthRange)
@@ -307,8 +307,8 @@
     <Axis x={xGraphs + widthGraph + widthKmh} y={0} axis={ktAxis} />
     <text x={xGraphs + widthGraph + widthKmh} y={margin.top - 7} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kt</text>
 
-    <text x={xGraphs} y={margin.top - 5} font-size="small">{site.name} {timeText}</text>
-    <text x={xGraphs + widthGraph - 5} y={height - 3} font-size="small" text-anchor="end">{formatDateTime(new Date(msNow))}</text>
+    <text x={xGraphs} y={margin.top - 5} class="text-xs">{site.name} {timeText}</text>
+    <text x={xGraphs} y={height - 3} class="text-xs">{formatDateTime(new Date(msNow))}</text>
 
     <!-- zone backgrounds -->
     <rect x={xGraphs} width={widthGraph} y={yLow}      height={hLow}      fill={colourLowBg} />

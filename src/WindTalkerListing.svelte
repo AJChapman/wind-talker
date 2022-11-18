@@ -18,7 +18,7 @@
             <h1 class="font-sans text-[#337ab7] font-medium text-2xl hover:underline mb-2">{site.name}</h1>
         </Link>
     {/if}
-    <div class="w-full h-64 lg:h-72 border" bind:offsetWidth={graphWidth} bind:offsetHeight={graphHeight}>
+    <div class="w-full h-52 sm:h-64 lg:h-72 xl:h-80 2xl:h-96 {compact ? "" : "border"}" bind:offsetWidth={graphWidth} bind:offsetHeight={graphHeight}>
         <WindTalker {site} width={graphWidth} height={graphHeight - 5} {date} {minutesToShow} />
     </div>
 </div>
