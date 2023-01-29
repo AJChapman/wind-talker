@@ -28,7 +28,7 @@
     const widthKt = 20
     const widthKmh = 30
     const yBetweenGraphs = 25
-    const strengthToDirectionGraphHeightRatio = 2 / 3
+    const strengthToDirectionGraphHeightRatio = 6 / 10
     const mphHeadroom: number = 4 // How many mph to graph above the maximum shown, so the peak doesn't touch the top of the graph
     const curve: d3Shape.CurveFactory = d3Shape.curveBumpX // method of interpolation between points
     const movingAverageAlpha: number = 0.05 // Lower is smoother, 1.0 is no smoothing
@@ -338,7 +338,7 @@
     {/each}
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
     {#each visibleSamples as sample}
-        <circle clip-path="url(#clip-direction-{site.path})" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
+        <circle clip-path="url(#clip-direction-{site.path})" fill={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
     {/each}
 </svg>
 {/if}
