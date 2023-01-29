@@ -1,17 +1,19 @@
 <script lang="ts">
     import WindTalkerListing from '$lib/WindTalkerListing.svelte'
     import Link from '$lib/Link.svelte'
-    import MinutesToShowURL from '$lib/MinutesToShowURL.svelte'
-    import CompactURL from '$lib/CompactURL.svelte'
     import CompactLink from '$lib/CompactLink.svelte'
     import type { Site } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
     import { clampMinutesToShow } from './settings'
     import { settings } from '$lib/settings'
+    import type { State } from '$lib/state'
+    import { getStateFromSearchParams, updateSearchParamsFromState } from '$lib/state'
 
     export let site: Site
-    export let date: Date | undefined = undefined
     export let searchParams: URLSearchParams
+
+    let state: State = getStateFromSearchParams(searchParams)
+    $: updateSearchParamsFromState(searchParams, state)
 
     let minutesToShow: number
     let compact: boolean
@@ -33,10 +35,8 @@
         {/if}
     {/if}
 
-    <TimeControls bind:date bind:minutesToShow {compact} />
-    <WindTalkerListing {site} {date} {minutesToShow} {compact} />
-    <MinutesToShowURL bind:searchParams bind:minutesToShow />
-    <CompactURL bind:searchParams bind:compact />
+    <TimeControls bind:state />
+    <WindTalkerListing {site} {state} />
     <CompactLink bind:compact />
 </main>
 
