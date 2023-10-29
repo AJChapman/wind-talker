@@ -56,7 +56,6 @@ const config = {
                 , '/woodstock'
                 ]
         },
-        trailingSlash: 'always',
         paths: { base: '/new' }
     }
 }

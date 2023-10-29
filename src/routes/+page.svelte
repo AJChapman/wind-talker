@@ -4,6 +4,8 @@
     import GroupListing from '$lib/GroupListing.svelte'
 
     import type { PageData } from './$types'
+
+    export const trailingSlash = 'always'
 </script>
 
 <main class="md:m-4 m-1 flex items-center justify-center">

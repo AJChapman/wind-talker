@@ -8,7 +8,6 @@ import { setSearchParam,  setSearchParams, setSearchParamToggle } from './search
 export interface State {
     date: Date | null
     minutesToShow: number
-    compact: boolean
 }
 
 export function getStateFromSearchParams(searchParams: URLSearchParams): State {
@@ -19,10 +18,8 @@ export function getStateFromSearchParams(searchParams: URLSearchParams): State {
         minutesToShow = minutesIn24Hours
     }
 
-    const compact = getCompactFromURLSearchParams(searchParams)
     return { date: date
            , minutesToShow: minutesToShow
-           , compact: compact
            }
 }
 
@@ -40,10 +37,6 @@ function getMinutesToShowFromURLSearchParams(searchParams: URLSearchParams): num
     return parseInt(m)
 }
 
-function getCompactFromURLSearchParams(searchParams: URLSearchParams): boolean {
-    return searchParams.has('compact')
-}
-
 export const updateSearchParamsFromState = debounce(setSearchParamsFromState, 1000, { leading: false, maxWait: 20000, trailing: true })
 function setSearchParamsFromState(searchParams: URLSearchParams, state: State): void {
     const oldSearchString = searchParams.toString()
@@ -54,7 +47,6 @@ function setSearchParamsFromState(searchParams: URLSearchParams, state: State): 
         setSearchParam(searchParams, 'date', formatISODate(state.date))
         setSearchParam(searchParams, 'minutesToShow', undefined)
     }
-    setSearchParamToggle(searchParams, 'compact', state.compact)
     const newSearchString = searchParams.toString()
     if (newSearchString !== oldSearchString) setSearchParams(searchParams)
 }
