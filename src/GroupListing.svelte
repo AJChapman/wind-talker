@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Group from '$lib/Group.svelte'
     import type { Site, SiteGroup } from '$lib/site'
     import Link from '$lib/Link.svelte'
 

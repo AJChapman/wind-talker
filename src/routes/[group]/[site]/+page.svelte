@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Group from '$lib/Group.svelte'
     import WindTalkerPage from '$lib/WindTalkerPage.svelte'
     import { siteByPath, groupByPath, groupSites } from '$lib/freeflightwx-sites'
 
@@ -11,7 +10,7 @@
 </script>
 
 {#if site !== undefined}
-    <WindTalkerPage {site} searchParams={data.searchParams} />
+    <WindTalkerPage {site} />
 {/if}
 
 

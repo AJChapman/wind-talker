@@ -11,9 +11,9 @@
 </script>
 
 {#if group !== undefined}
-    <Group {group} searchParams={data.searchParams} />
+    <Group {group} />
 {/if}
 {#if site !== undefined}
-    <WindTalkerPage {site} searchParams={data.searchParams} />
+    <WindTalkerPage {site} />
 {/if}
 
