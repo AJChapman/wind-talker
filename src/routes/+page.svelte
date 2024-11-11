@@ -11,8 +11,8 @@
         <GroupListing group={nevic} sites={nevicSites} />
         <GroupListing group={svic} sites={svicSites} />
         <GroupListing group={sqld} sites={sqldSites} />
-        <GroupListing group={nqld} sites={nqldSites} />
         <GroupListing group={nsw} sites={nswSites} />
+        <GroupListing group={nqld} sites={nqldSites} />
         <GroupListing group={"Other"} sites={[tunk, singlehill, kuratake, eclipselx3, test]} />
     </div>
 </main>

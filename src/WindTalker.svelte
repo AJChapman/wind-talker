@@ -152,8 +152,12 @@
     $: mphDomain = [0, graphMaxMph]
     $: ktDomain = [0, mphToKt(graphMaxMph)]
     $: kmhDomain = [0, mphToKmh(graphMaxMph)]
+
+    // The centre of the direction graph is site.dirOnCentre, if defined, otherwise the center of the first direction band
+    // TODO: in the old site all graphs are centred on S when listed together (i.e. dirOnTop is 0 a.k.a. N)
     // dirOnCentre is in [0..359]
-    $: dirOnCentre = (site.dirOnCentre === undefined) ? 180 : site.dirOnCentre
+    $: dirOnCentre = (site.dirOnCentre === undefined) ? site.directions[0].centerDeg : site.dirOnCentre
+
     // dirOnTop is in [0..359]
     $: dirOnTop = (dirOnCentre + 180) % 360
     // dirDomain is in [0..719] but doesn't span more than 360 of these

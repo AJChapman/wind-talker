@@ -8,9 +8,9 @@ export const acthpa: SiteGroup =
     , path: 'acthpa'
     }
 
-springhill.group = acthpa;
-lanyon.group = acthpa;
-lanyon.path = 'lanyon'; // Override 'acthpa/lanyon'
+springhill.group = acthpa
+lanyon.group = acthpa
+lanyon.path = 'lanyon' // Override 'acthpa/lanyon'
 
 export const lakegeorge: Site =
     { name: 'Lake George'
@@ -48,7 +48,7 @@ export const mystic: Site =
                    }]
     , altitudeFt: 2615
     , dirAdjust: 0
-    , dirOnCentre: 285
+    , dirOnCentre: undefined
     }
 
 gundowring.group = nevic
@@ -76,7 +76,7 @@ export const flowerdale: Site =
                    }]
     , altitudeFt: 1600
     , dirAdjust: 0
-    , dirOnCentre: undefined
+    , dirOnCentre: 350
     }
 
 
@@ -107,13 +107,6 @@ mama.group = sqld
 killarney.group = sqld
 wilsons.group = sqld
 
-export const nqld: SiteGroup =
-    { name: 'North Queensland'
-    , path: 'nqld'
-    }
-
-mtinkerman.group = nqld
-
 export const nsw: SiteGroup =
     { name: 'New South Wales'
     , path: 'nsw'
@@ -122,6 +115,14 @@ export const nsw: SiteGroup =
 softys.group = nsw
 crackneck.group = nsw
 stanwell.group = nsw
+
+export const nqld: SiteGroup =
+    { name: 'North Queensland'
+    , path: 'nqld'
+    }
+
+mtinkerman.group = nqld
+mtinkerman.path = 'mtinkerman' // Wrong in the DB, says 'Mt Inkerman'
 
 export const pops: Site =
     { name: 'Pops'
@@ -374,16 +375,16 @@ export const acthpaSites = groupSites(acthpa)
 export const nevicSites = groupSites(nevic)
 export const svicSites = groupSites(svic)
 export const sqldSites = groupSites(sqld)
-export const nqldSites = groupSites(nqld)
 export const nswSites = groupSites(nsw)
+export const nqldSites = groupSites(nqld)
 
 export const allGroups: Array<SiteGroup> =
     [ acthpa
     , nevic
     , svic
     , sqld
-    , nqld
     , nsw
+    , nqld
     ]
 
 export function siteByPath(path: string, sites: Array<Site> = allSites): Site | undefined {
