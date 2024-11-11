@@ -36,6 +36,7 @@
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.1.0",
+    "exponential-backoff": "^3.1.0",
     "lodash.debounce": "^4.0.8",
     "postcss": "^8.4.18",
     "safety-match": "^0.4.4",

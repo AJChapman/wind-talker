@@ -9,7 +9,7 @@
     let graphHeight: number
 </script>
 
-<div class="w-full flex flex-col h-80 md:h-96 px-1 md:px-4 my-4">
+<div class="w-full flex flex-col h-96 my-4">
     <a class="flex-none" href="{import.meta.env.BASE_URL}{site.folder}/">
         <h1 class="font-sans text-[#337ab7] font-medium text-2xl hover:underline mb-2">{site.name}</h1>
     </a>

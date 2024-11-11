@@ -7,6 +7,7 @@
     import { onMount, tick } from 'svelte'
     import VisibilityChange from 'svelte-visibility-change'
     import debounce from 'lodash.debounce'
+    import { backOff } from 'exponential-backoff'
 
     import type { Site } from './site'
     import { fetchSamples } from './freeflightwx-fetch'
@@ -32,6 +33,7 @@
     const curve: d3Shape.CurveFactory = d3Shape.curveBumpX // method of interpolation between points
     const movingAverageAlpha: number = 0.05 // Lower is smoother, 1.0 is no smoothing
     const recentSecs: number = 600 // Duration considered in min/max/avg lines. 600 is 10 mins
+    const updateNowMs: number = 1000 // How often to update the current time, moving the graph forward
     const visibleRefreshMs: number = 1000 // refresh every second when visible
     const hiddenRefreshMs: number = 30000 // refresh every 30 seconds when invisible
 
@@ -194,78 +196,42 @@
         loadedSamples = newSamples.filter((x, i, a) => (i == 0) || (x.id != a[i - 1].id))
     }
 
-    // We keep track of how far this browser's time differs from that of the last sample on the server.
-    // This should account for local time zone differences as well as just a clock that's completely wrong
-    let msLocalTimeOffset: number = 0
-
-    function msLocalToServer(msLocal: number): number {
-        return msLocal - msLocalTimeOffset
-    }
-
     // Trigger getMissingSamples() whenever msToShow changes.
     // We deliberately don't depend on msEarliestToShow, because this is changed by msNow,
     // which changes much more frequently.
-    $: requestMissingSamples(msToShow)
-
-    // Debounce getting missing samples so we don't spam the server too much
-    const requestMissingSamples = debounce(((ms: number) => getMissingSamples()), 200, { leading: true, maxWait: 500, trailing: true })
-
-    function getMissingSamples() {
-        const msBeforeLoaded = msEarliestLoadedSample - msEarliestToLoad
-        if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {
-            pauseUpdates()
-            fetchSamples(site, msEarliestToLoad, msEarliestLoadedSample).then(newSamples => addSamples(newSamples))
-            resumeUpdates()
-        }
-    }
-
-    // This type is odd... but it typechecks :/
-    let updateTimeout: string | number | NodeJS.Timeout | undefined
-
-    function pauseUpdates() {
-        if (updateTimeout !== undefined) {
-            clearTimeout(updateTimeout)
-            updateTimeout = undefined
-        }
-    }
-
-    function resumeUpdates() {
-        // Wait for any newly fetched samples to be registered before starting/resuming updates
-        tick().then(() => {
-            if (updateTimeout === undefined) {
-                updateTimeout = setTimeout(update, refreshIntervalMs)
-            }
-        })
-    }
+    $: requestUpdate(msToShow)
 
     $: refreshIntervalMs = visible ? visibleRefreshMs : hiddenRefreshMs
 
-    $: changeTimeout(refreshIntervalMs)
+    // Debounce getting missing samples so we don't spam the server too much
+    $: requestUpdate = debounce(((ms: number) => update()), refreshIntervalMs, { leading: true, maxWait: refreshIntervalMs, trailing: true })
 
-    function changeTimeout(refreshIntervalMs: number) {
-        // Change the timeout when refreshIntervalMs changes (unless the timer wasn't running)
-        if (updateTimeout !== undefined) {
-            clearTimeout(updateTimeout)
-            updateTimeout = setTimeout(update, refreshIntervalMs)
-        }
-    }
+    onMount(() => setInterval(updateNow, updateNowMs))
 
-    // onMount(() => update())
-
-    function update(): void {
-        pauseUpdates()
-
+    function updateNow() {
         // Update when we consider 'now' to be.
         // We don't do this continuously because this would produce too much busy-work.
         // Instead we do it at the update interval (visibleRefreshMs when the window is visible).
-        msNow = msLocalToServer(Date.now())
+        msNow = Date.now()
+        requestUpdate(msToShow)
+    }
 
-        const samplesMissing = msToSamples(msNow - msLastLoadedSample)
-        if (samplesMissing > 0) {
-            fetchSamples(site, msLastLoadedSample).then(newSamples => addSamples(newSamples))
+    async function update(): Promise<void> {
+        const msBeforeLoaded = msEarliestLoadedSample - msEarliestToLoad
+        if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {
+            // We need to load samples before the first sample
+            const newSamples = await fetchSamples(site, msEarliestToLoad, msEarliestLoadedSample)
+            addSamples(newSamples)
+            await tick()
+        } else {
+            // Check whether it's time to start asking for the latest samples
+            const samplesMissing = msToSamples(msNow - msLastLoadedSample)
+            if (samplesMissing > 0) {
+                const newSamples = await fetchSamples(site, msLastLoadedSample)
+                addSamples(newSamples)
+                await tick()
+            }
         }
-
-        resumeUpdates()
     }
 </script>
 
