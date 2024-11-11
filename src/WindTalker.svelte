@@ -7,10 +7,9 @@
     import { onMount, tick } from 'svelte'
     import VisibilityChange from 'svelte-visibility-change'
     import debounce from 'lodash.debounce'
-    import { backOff } from 'exponential-backoff'
 
     import type { Site } from './site'
-    import { fetchSamples } from './freeflightwx-fetch'
+    import { fetchSamplesBackoff } from './freeflightwx-fetch'
     import type { Sample } from './sample'
     import Axis from './Axis.svelte'
     import type { Margin } from './margin'
@@ -217,22 +216,33 @@
         requestUpdate(msToShow)
     }
 
+    // We only allow one update to be running at a time.
+    // It will keep retrying until it succeeds.
+    let updating: boolean = false
+
     async function update(): Promise<void> {
+        if (updating) return
+        updating = true
         const msBeforeLoaded = msEarliestLoadedSample - msEarliestToLoad
         if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {
             // We need to load samples before the first sample
-            const newSamples = await fetchSamples(site, msEarliestToLoad, msEarliestLoadedSample)
-            addSamples(newSamples)
+            const newSamples = await fetchSamplesBackoff(site, msEarliestToLoad, msEarliestLoadedSample)
+            if (newSamples.length > 0) {
+                addSamples(newSamples)
+            }
             await tick()
         } else {
             // Check whether it's time to start asking for the latest samples
             const samplesMissing = msToSamples(msNow - msLastLoadedSample)
             if (samplesMissing > 0) {
-                const newSamples = await fetchSamples(site, msLastLoadedSample)
-                addSamples(newSamples)
+                const newSamples = await fetchSamplesBackoff(site, msLastLoadedSample)
+                if (newSamples.length > 0) {
+                    addSamples(newSamples)
+                }
                 await tick()
             }
         }
+        updating = false
     }
 </script>
 
