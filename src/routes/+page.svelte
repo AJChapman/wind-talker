@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { acthpa, acthpaSites, nevic, nevicSites, svic, svicSites, pops, tunk, kurutake } from '$lib/freeflightwx-sites'
+    import { acthpa, acthpaSites, nevic, nevicSites, svic, svicSites, sqld, sqldSites, nqld, nqldSites, nsw, nswSites, tunk, singlehill, kuratake, eclipselx3, test } from '$lib/freeflightwx-sites'
     import GroupListing from '$lib/GroupListing.svelte'
 </script>
 
@@ -10,7 +10,10 @@
         <GroupListing group={acthpa} sites={acthpaSites} />
         <GroupListing group={nevic} sites={nevicSites} />
         <GroupListing group={svic} sites={svicSites} />
-        <GroupListing group={"Other"} sites={[pops, tunk, kurutake]} />
+        <GroupListing group={sqld} sites={sqldSites} />
+        <GroupListing group={nqld} sites={nqldSites} />
+        <GroupListing group={nsw} sites={nswSites} />
+        <GroupListing group={"Other"} sites={[tunk, singlehill, kuratake, eclipselx3, test]} />
     </div>
 </main>
 

@@ -1,25 +1,16 @@
 import type { Site, SiteGroup } from './site'
 
+import { buckland, corryong, crackneck, emu, gundowring, killarney, mama, mtinkerman, porepunkah, singlehill, lanyon, softys, springhill, stanwell, stringybark, tunk4, wilsons } from './freeflightwx-sites-autogen'
+export { buckland, corryong, crackneck, emu, gundowring, killarney, mama, mtinkerman, porepunkah, singlehill, lanyon, softys, springhill, stanwell, stringybark, tunk4, wilsons }
+
 export const acthpa: SiteGroup =
     { name: 'Canberra (ACTHPA)'
     , path: 'acthpa'
     }
 
-export const springhill: Site =
-    { name: 'Spring Hill'
-    , group: acthpa
-    , path: 'springhill'
-    , timezone: 'Australia/Sydney'
-    , speedLowMph: 13
-    , speedOnMph: 18
-    , speedMarginalMph: 22
-    , speedMaxMph: 150 // max recordable wind speed to cancel out electrical interference
-    , directions: [{ centerDeg: 280
-                   , halfWidthDeg: 45
-                   }]
-    , altitudeFt: 2870
-    , dirAdjust: 0
-    }
+springhill.group = acthpa;
+lanyon.group = acthpa;
+lanyon.path = 'lanyon'; // Override 'acthpa/lanyon'
 
 export const lakegeorge: Site =
     { name: 'Lake George'
@@ -34,22 +25,6 @@ export const lakegeorge: Site =
                    , halfWidthDeg: 45
                    }]
     , altitudeFt: 2185
-    , dirAdjust: 0
-    }
-
-export const lanyon: Site =
-    { name: 'Lanyon (Big Monks)'
-    , group: acthpa
-    , path: 'lanyon'
-    , timezone: 'Australia/Sydney'
-    , speedLowMph: 8
-    , speedOnMph: 13
-    , speedMarginalMph: 20
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 280
-                   , halfWidthDeg: 45
-                   }]
-    , altitudeFt: 2970
     , dirAdjust: 0
     }
 
@@ -74,90 +49,11 @@ export const mystic: Site =
     , dirAdjust: 0
     }
 
-export const gundowring: Site =
-    { name: 'Gundowring'
-    , group: nevic
-    , path: 'gundowring'
-    , timezone: 'Australia/Melbourne'
-    , speedLowMph: 1
-    , speedOnMph: 13
-    , speedMarginalMph: 16
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 285
-                   , halfWidthDeg: 50
-                   }]
-    , altitudeFt: 2110
-    , dirAdjust: 0
-    }
-
-export const mtemu: Site =
-    { name: 'Mt Emu'
-    , group: nevic
-    , path: 'emu'
-    , timezone: 'Australia/Melbourne'
-    , speedLowMph: 1
-    , speedOnMph: 12
-    , speedMarginalMph: 14
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 258.75
-                   , halfWidthDeg: 33.75
-                   }]
-    , altitudeFt: 3200
-    , dirAdjust: 0
-    }
-
-export const buckland: Site =
-    { name: 'Buckland Ridge'
-    , group: nevic
-    , path: 'buckland'
-    , timezone: 'Australia/Melbourne'
-    , speedLowMph: 1
-    , speedOnMph: 13
-    , speedMarginalMph: 16
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 213.75
-                   , halfWidthDeg: 33.75
-                   }]
-    , altitudeFt: 1845
-    , dirAdjust: 0
-    }
-
-/* todo: two directions! */
-export const porepunkah: Site =
-    { name: 'Porepunkah'
-    , group: nevic
-    , path: 'porepunkah'
-    , timezone: 'Australia/Melbourne'
-    , speedLowMph: 1
-    , speedOnMph: 12
-    , speedMarginalMph: 14
-    , speedMaxMph: 150
-    , directions: [ { centerDeg: 13
-                    , halfWidthDeg: 30
-                    }
-                  , { centerDeg: 193
-                    , halfWidthDeg: 30
-                    }
-                  ]
-    , altitudeFt: 935
-    , dirAdjust: -77
-    }
-
-export const corryong: Site =
-    { name: 'Corryong'
-    , group: nevic
-    , path: 'corryong'
-    , timezone: 'Australia/Melbourne'
-    , speedLowMph: 1
-    , speedOnMph: 12
-    , speedMarginalMph: 14
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 290
-                   , halfWidthDeg: 35
-                   }]
-    , altitudeFt: 3010
-    , dirAdjust: 0
-    }
+gundowring.group = nevic
+emu.group = nevic
+buckland.group = nevic
+corryong.group = nevic
+corryong.path = 'corryong'
 
 export const svic: SiteGroup =
     { name: 'South Victoria'
@@ -197,9 +93,35 @@ export const mtbroughton: Site =
     , dirAdjust: 0
     }
 
+export const sqld: SiteGroup =
+    { name: 'South Queensland'
+    , path: 'sqld'
+    }
+
+stringybark.group = sqld
+mama.group = sqld
+killarney.group = sqld
+wilsons.group = sqld
+
+export const nqld: SiteGroup =
+    { name: 'North Queensland'
+    , path: 'nqld'
+    }
+
+mtinkerman.group = nqld
+
+export const nsw: SiteGroup =
+    { name: 'New South Wales'
+    , path: 'nsw'
+    }
+
+softys.group = nsw
+crackneck.group = nsw
+stanwell.group = nsw
+
 export const pops: Site =
     { name: 'Pops'
-    , group: undefined
+    , group: nqld
     , path: 'pops'
     , timezone: 'Australia/Melbourne'
     , speedLowMph: 3
@@ -229,10 +151,10 @@ export const tunk: Site =
     , dirAdjust: 0
     }
 
-export const kurutake: Site =
-    { name: 'Kurutake'
+export const kuratake: Site =
+    { name: 'Kuratake'
     , group: undefined
-    , path: 'kurutake'
+    , path: 'kuratake'
     , timezone: 'Asia/Tokyo'
     , speedLowMph: 1
     , speedOnMph: 9
@@ -295,9 +217,10 @@ export const eclipselx3: Site =
     , dirAdjust: 0
     }
 
+// The auto-generated version of this seems to be wrong at time of writing.
 export const hooleydooley: Site =
     { name: 'Hooley Dooley'
-    , group: undefined
+    , group: nsw
     , path: 'hooleydooley'
     , timezone: 'Australia/Melbourne'
     , speedLowMph: 3
@@ -313,7 +236,7 @@ export const hooleydooley: Site =
 
 export const lakestclaire: Site =
     { name: 'Lake St Claire'
-    , group: undefined
+    , group: nsw
     , path: 'lakestclaire'
     , timezone: 'Australia/Sydney'
     , speedLowMph: 1
@@ -324,38 +247,6 @@ export const lakestclaire: Site =
                    , halfWidthDeg: 40
                    }]
     , altitudeFt: 2615
-    , dirAdjust: 0
-    }
-
-export const softys: Site =
-    { name: 'Softys'
-    , group: undefined
-    , path: 'softys'
-    , timezone: 'Australia/Sydney'
-    , speedLowMph: 1
-    , speedOnMph: 12
-    , speedMarginalMph: 14
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 350
-                   , halfWidthDeg: 40
-                   }]
-    , altitudeFt: 2615
-    , dirAdjust: 0
-    }
-
-export const stringybark: Site =
-    { name: 'Stringybark'
-    , group: undefined
-    , path: 'stringybark'
-    , timezone: 'Australia/Brisbane'
-    , speedLowMph: 3
-    , speedOnMph: 10
-    , speedMarginalMph: 15
-    , speedMaxMph: 150
-    , directions: [{ centerDeg: 90
-                   , halfWidthDeg: 90
-                   }]
-    , altitudeFt: 1440
     , dirAdjust: 0
     }
 
@@ -429,22 +320,30 @@ export const allSites: Array<Site> =
     , lanyon
     , mystic
     , gundowring
-    , mtemu
+    , emu
     , buckland
     , porepunkah
     , corryong
     , flowerdale
     , mtbroughton
+    , stringybark
+    , mama
+    , killarney
+    , wilsons
+    , hooleydooley
+    , softys
+    , lakestclaire
+    , crackneck
+    , stanwell
     , pops
+    , mtinkerman
+    , singlehill
+    , tunk4
     , tunk
-    , kurutake
+    , kuratake
     , eclipselx
     , eclipselx2
     , eclipselx3
-    , hooleydooley
-    , lakestclaire
-    , softys
-    , stringybark
     , temp
     , test
     , winton
@@ -458,11 +357,17 @@ export function groupSites(group: SiteGroup): Array<Site> {
 export const acthpaSites = groupSites(acthpa)
 export const nevicSites = groupSites(nevic)
 export const svicSites = groupSites(svic)
+export const sqldSites = groupSites(sqld)
+export const nqldSites = groupSites(nqld)
+export const nswSites = groupSites(nsw)
 
 export const allGroups: Array<SiteGroup> =
     [ acthpa
     , nevic
     , svic
+    , sqld
+    , nqld
+    , nsw
     ]
 
 export function siteByPath(path: string, sites: Array<Site> = allSites): Site | undefined {

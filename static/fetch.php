@@ -3,27 +3,39 @@
 
     ini_set('zlib.output_compression', 1);
 
+    // Fix for CORS when testing on localhost
+    header('Access-Control-Allow-Origin: *');
+
     $data_tables = array(
-       'springhill' => 'spring_hill',
-       'lakegeorge' => 'lakegeorge',
-       'lanyon' => 'lanyon',
-       'mystic' => 'mystic',
-       'gundowring' => 'gundowring',
-       'emu' => 'emu',
        'buckland' => 'buckland',
-       'porepunkah' => 'porepunkah',
        'corryong' => 'corryong',
+       'crackneck' => 'crackneck',
+       'emu' => 'emu',
+       'gundowring' => 'gundowring',
+       'killarney' => 'killarney',
+       'lanyon' => 'lanyon',
+       'mama' => 'mama',
+       'mtinkerman' => 'mtinkerman',
+       'porepunkah' => 'porepunkah',
+       'singlehill' => 'singlehill',
+       'softys' => 'softys',
+       'springhill' => 'spring_hill',
+       'stanwell' => 'stanwell',
+       'stringybark' => 'stringybark',
+       'tunk4' => 'tunk4',
+       'wilsons' => 'wilsons',
+       'lakegeorge' => 'lakegeorge',
+       'mystic' => 'mystic',
        'flowerdale' => 'flowerdale',
        'mtbroughton' => 'mtbroughton',
        'pops' => 'pops',
        'tunk' => 'tunk',
-       'kurutake' => 'kurutake',
+       'kuratake' => 'kuratake',
        'eclipselx' => 'eclipselx',
        'eclipselx2' => 'eclipselx2',
        'eclipselx3' => 'eclipselx3',
        'hooleydooley' => 'hooleydooley',
        'lakestclaire' => 'lakestclaire',
-       'softys' => 'softys',
        'stringybark' => 'stringybark',
        'temp' => 'temp',
        'test' => 'test',
@@ -69,7 +81,6 @@
         $data[]=$row;
     }
 
-    header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data);
 ?>

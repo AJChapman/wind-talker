@@ -62,6 +62,14 @@ Until I figure out how to automate this, there are several places you need to ch
 3. Add its path to the list of entry points in `svelte.config.js`.
 4. (optional) Add it to `src/routes/+page.svelte` to include it on the home page.
 
+## To Update Auto-Generated Sites from the Freeflightwx Database
+
+The `static/export_sites.php` script needs to be run on the server, like this (assuming it has been uploaded by ftp):
+
+```shell
+curl -o src/freeflightwx-sites-autogen.ts https://freeflightwx.com/new/export_sites.php
+```
+
 ## To Add a Group of Sites
 
 After you have added the individual sites:
