@@ -37,10 +37,10 @@
 
 <style type="text/postcss">
     button {
-        @apply bg-gray-500 text-white font-bold mt-1 py-1 px-2 rounded shadow hover:bg-blue-400 text-sm;
+        @apply bg-gray-500 text-white font-bold mt-1 py-1 px-2 rounded shadow /*hover:bg-blue-400*/ text-sm;
     }
 
     .enabled {
-        @apply bg-blue-500 shadow-inner
+        @apply bg-blue-500 shadow-inner;
     }
 </style>

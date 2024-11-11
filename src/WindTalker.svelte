@@ -27,7 +27,7 @@
     const widthKt = 20
     const widthKmh = 30
     const yBetweenGraphs = 25
-    const strengthToDirectionGraphHeightRatio = 6 / 10
+    const strengthToDirectionGraphHeightRatio = 5 / 10
     const mphHeadroom: number = 4 // How many mph to graph above the maximum shown, so the peak doesn't touch the top of the graph
     const curve: d3Shape.CurveFactory = d3Shape.curveBumpX // method of interpolation between points
     const movingAverageAlpha: number = 0.05 // Lower is smoother, 1.0 is no smoothing
@@ -147,11 +147,11 @@
     $: mphDomain = [0, graphMaxMph]
     $: ktDomain = [0, mphToKt(graphMaxMph)]
     $: kmhDomain = [0, mphToKmh(graphMaxMph)]
-    const dirDomain = [0, 359] // degrees
+    const dirDomain = [site.dirAdjust, site.dirAdjust + 359] // degrees
     $: dirStartDegs = site.directions.map(d => d.centerDeg - d.halfWidthDeg)
     $: dirEndDegs = site.directions.map(d => d.centerDeg + d.halfWidthDeg)
     $: dirScale = d3Scale.scaleLinear(dirDomain, yDirectionRange)
-    $: cardinalScale = d3Scale.scalePoint(["N", "E", "S", "W", ""], yDirectionRange)
+    $: cardinalScale = d3Scale.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], yDirectionRange)
 
     $: xScale = d3Scale.scaleTime().domain(timeRange).range(xRange)
     $: ktScale = d3Scale.scaleLinear(ktDomain, yStrengthRange)
@@ -341,7 +341,7 @@
     {/each}
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
     {#each visibleSamples as sample}
-        <circle clip-path="url(#clip-direction-{site.path})" fill={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
+        <circle clip-path="url(#clip-direction-{site.path})" fill={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={2.0} />
     {/each}
 </svg>
 {/if}

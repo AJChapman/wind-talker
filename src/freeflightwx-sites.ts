@@ -182,7 +182,7 @@ export const flowerdale: Site =
 
 
 export const mtbroughton: Site =
-    { name: 'Mt Broughton (Thistle Hill)'
+    { name: 'Mt Broughton'
     , group: svic
     , path: 'mtbroughton'
     , timezone: 'Australia/Melbourne'

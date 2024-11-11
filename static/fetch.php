@@ -5,7 +5,7 @@
 
     $data_tables = array(
        'springhill' => 'spring_hill',
-       'lakegeorge' => 'lake_george',
+       'lakegeorge' => 'lakegeorge',
        'lanyon' => 'lanyon',
        'mystic' => 'mystic',
        'gundowring' => 'gundowring',
