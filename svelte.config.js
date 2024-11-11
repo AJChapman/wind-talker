@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-static';
 import sveltePreprocess from 'svelte-preprocess'
 
 export default {
@@ -10,6 +10,8 @@ export default {
 
     kit: {
         adapter: adapter(),
-        files: { lib: 'src' }
+        files: { lib: 'src' },
+        prerender: { entries: [ "*" ] },
+        trailingSlash: 'always'
     }
 }

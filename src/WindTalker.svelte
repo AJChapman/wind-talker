@@ -4,7 +4,7 @@
     import * as d3Scale from 'd3-scale';
     import * as d3Shape from 'd3-shape';
 
-    import { onMount, tick } from 'svelte'
+    import { onMount, onDestroy, tick } from 'svelte'
     import VisibilityChange from 'svelte-visibility-change'
     import debounce from 'lodash.debounce'
 
@@ -54,6 +54,8 @@
     const colourDirOn:       string = '#008100'
     const colourDirOff:      string = '#8c4521'
     const colourDir:         string = '#ffff00'
+
+    let doUpdates: boolean = false
 
     let visibility: "visible" | "hidden" = "visible"
     $: visible = visibility == "visible"
@@ -192,14 +194,23 @@
     // Trigger getMissingSamples() whenever msToShow changes.
     // We deliberately don't depend on msEarliestToShow, because this is changed by msNow,
     // which changes much more frequently.
-    $: requestUpdate(msToShow)
+    $: if (doUpdates) requestUpdate(msToShow)
 
     $: refreshIntervalMs = visible ? visibleRefreshMs : hiddenRefreshMs
 
     // Debounce getting missing samples so we don't spam the server too much
     $: requestUpdate = debounce(((ms: number) => update()), refreshIntervalMs, { leading: true, maxWait: refreshIntervalMs, trailing: true })
 
-    onMount(() => setInterval(updateNow, updateNowMs))
+    let timer: NodeJS.Timer | undefined
+    onMount(() => {
+        doUpdates = true
+        timer = setInterval(updateNow, updateNowMs)
+    })
+
+    onDestroy(() => {
+        doUpdates = false
+        clearInterval(timer)
+    })
 
     function updateNow() {
         // Update when we consider 'now' to be.
