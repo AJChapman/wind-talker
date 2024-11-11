@@ -11,7 +11,6 @@
 
     import type { Site } from './site'
     import { fetchSamples } from './freeflightwx-fetch'
-    import { sampleIntervalSecs } from './freeflightwx-db'
     import type { Sample } from './sample'
     import Axis from './Axis.svelte'
     import type { Margin } from './margin'
@@ -69,7 +68,9 @@
     $: msEarliestLoadedSample = (loadedSamples.length > 0) ? loadedSamples[0].time.getTime() : msNow
     $: msLastLoadedSample = (lastLoadedSample !== undefined) ? lastLoadedSample.time.getTime() : (msNow - msToShow)
     $: msEarliestToShow = msNow - msToShow
-    $: msEarliestToLoad = msEarliestToShow - secondsToMs(sampleIntervalSecs)
+
+    // Load more samples before the start of the graph, so that the recent lines are correct
+    $: msEarliestToLoad = msEarliestToShow - secondsToMs(recentSecs)
 
     let visibleSamples: Array<Sample> = new Array()
     $: visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= msEarliestToLoad)
