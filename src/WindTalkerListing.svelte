@@ -11,7 +11,7 @@
 
 <div class="w-full flex flex-col h-80 md:h-96 px-1 md:px-4 my-4">
     <a class="flex-none" href="/{site.folder}/">
-        <h1 class="font-sans text-sky-700 text-xl hover:underline mb-2">{site.name}</h1>
+        <h1 class="font-sans text-[#337ab7] font-medium text-2xl hover:underline mb-2">{site.name}</h1>
     </a>
     <div class="grow w-full border" bind:offsetWidth={graphWidth} bind:offsetHeight={graphHeight}>
         <WindTalker site={site} width={graphWidth} height={graphHeight - 5} {minutesToShow} />
