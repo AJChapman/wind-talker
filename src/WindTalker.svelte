@@ -70,8 +70,6 @@
     let visibility: "visible" | "hidden" = "visible"
     $: visible = visibility == "visible"
 
-    $: console.log(`minutes to show: ${$minutesToShow}`)
-
     $: msToShow = minutesToMs($minutesToShow)
 
     let loadedSamples: Array<Sample> = new Array()
@@ -141,18 +139,45 @@
       return results
     }
 
+    function rotateArray(arr, k) {
+        const n = arr.length;
+        k = ((k % n) + n) % n; // Normalize k
+        arr.push(...arr.splice(0, k));
+        return arr;
+    }
+
     // Scale up to at least the marginal wind strength, or the max wind strength shown, but no more than the site max.
     $: sampleMaxMph = d3Array.max(windMaxMph)
     $: graphMaxMph = Math.min(site.speedMaxMph, Math.max((sampleMaxMph ? sampleMaxMph : 0) + mphHeadroom, site.speedMarginalMph))
     $: mphDomain = [0, graphMaxMph]
     $: ktDomain = [0, mphToKt(graphMaxMph)]
     $: kmhDomain = [0, mphToKmh(graphMaxMph)]
-    const dirDomain = [site.dirAdjust, site.dirAdjust + 359] // degrees
-    $: dirStartDegs = site.directions.map(d => d.centerDeg - d.halfWidthDeg)
-    $: dirEndDegs = site.directions.map(d => d.centerDeg + d.halfWidthDeg)
-    $: dirScale = d3Scale.scaleLinear(dirDomain, yDirectionRange)
-    $: cardinalScale = d3Scale.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], yDirectionRange)
+    // dirOnCentre is in [0..359]
+    $: dirOnCentre = (site.dirOnCentre === undefined) ? 180 : site.dirOnCentre
+    // dirOnTop is in [0..359]
+    $: dirOnTop = (dirOnCentre + 180) % 360
+    // dirDomain is in [0..719] but doesn't span more than 360 of these
+    $: dirDomain = [dirOnTop, dirOnTop + 359] // degrees
 
+    // Adjust direction values to fall within dirDomain
+    $: dirAdjust = (d) => {
+        if (d > dirDomain[1]) {
+            return d - 360
+        } else if (d < dirDomain[0]) {
+            return d + 360
+        }
+        return d
+    }
+
+    // Scale adjusted directions to the direction graph
+    $: directionScale = d3Scale.scaleLinear(dirDomain, yDirectionRange)
+
+    // Scale unadjusted directions to the direction graph
+    $: dirScale = (d) => directionScale(dirAdjust(d))
+
+    // d.centerDeg is in [0..359]
+    $: dirStartDegs = site.directions.map(d => dirAdjust(d.centerDeg - d.halfWidthDeg))
+    $: dirEndDegs = site.directions.map(d => dirAdjust(d.centerDeg + d.halfWidthDeg))
     $: xScale = d3Scale.scaleTime().domain(timeRange).range(xRange)
     $: ktScale = d3Scale.scaleLinear(ktDomain, yStrengthRange)
     $: kmhScale = d3Scale.scaleLinear(kmhDomain, yStrengthRange)
@@ -160,7 +185,22 @@
     $: timeAxis = d3Axis.axisBottom(xScale).ticks(widthGraph / 70).tickSizeOuter(0)
     $: ktAxis = d3Axis.axisRight(ktScale).ticks(heightStrengthGraph / 20)
     $: kmhAxis = d3Axis.axisRight(kmhScale).ticks(heightStrengthGraph / 20)
-    $: cardinalAxis = d3Axis.axisRight(cardinalScale)
+
+    // The directions axis.
+    // We enter unadjusted numeric values for each compass point, then adjust them with dirAdjust.
+    // We then have a custom format to change these numbers into the compass points.
+    $: cardinalAxis = d3Axis.axisRight(directionScale).tickValues([0, 45, 90, 135, 180, 225, 270, 315, 360].map(dirAdjust)).tickFormat((x) => {
+        if (x === dirAdjust(0)) return "N"
+        if (x === dirAdjust(45)) return "NE"
+        if (x === dirAdjust(90)) return "E"
+        if (x === dirAdjust(135)) return "SE"
+        if (x === dirAdjust(180)) return "S"
+        if (x === dirAdjust(225)) return "SW"
+        if (x === dirAdjust(270)) return "W"
+        if (x === dirAdjust(315)) return "NW"
+        if (x === dirAdjust(360)) return "N"
+        return undefined
+    }).tickSizeOuter(0) // Don't put extra ticks at the top and bottom
 
     $: yLow = mphScale(site.speedLowMph)
     $: yOn = mphScale(site.speedOnMph)
