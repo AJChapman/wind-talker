@@ -1,6 +1,5 @@
 <script lang="ts">
     import { compact } from "$lib/state"
-    $: console.log(`compact: ${$compact}`)
 </script>
 
 {#if !$compact}

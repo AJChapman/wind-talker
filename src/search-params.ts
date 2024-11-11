@@ -118,7 +118,6 @@ export function queryParam<T>(
 
         // Change the URL
         // Push a new history item (if 'pushHistory')
-        if (pushHistory) console.log(`Pushing new browser history: ${queryString}`)
         await goto(queryString, { keepFocus: true, noScroll: true, replaceState: !pushHistory })
         searchParamValueUpdates.clear()
       }
@@ -127,9 +126,6 @@ export function queryParam<T>(
 
   // Subscribe to the page to receive changes to the URL's search parameters
   const unsubPage = page.subscribe(($page) => {
-    if (browser && $page !== undefined && $page.url !== undefined) {
-      console.log($page.url.searchParams)
-    }
     if (browser && $page !== undefined && $page.url !== undefined && $page.url.searchParams !== undefined) {
       // Create our setter, to set the value of the search param
       setRef.set = (value: T) => {
@@ -144,9 +140,6 @@ export function queryParam<T>(
       const actualParam: string | null = $page.url.searchParams.get(name)
       const actualValue: T | undefined = actualParam === null ? defaultValue : decode(actualParam)
       const correctValue: T = actualValue ?? defaultValue
-
-      console.log('Page update')
-      console.log(correctValue)
 
       // Set the value so the store always has a valid value
       setStore(correctValue)
