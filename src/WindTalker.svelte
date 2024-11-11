@@ -290,7 +290,8 @@
 <svg {width} {height} viewBox="0 0 {width} {height}">
     <defs>
         <!-- clip paths -->
-        <clipPath id="clip-graphs-{site.path}">  <rect x={xGraphs} width={widthGraph} y={margin.top} height={heightGraphs} /></clipPath>
+        <clipPath id="clip-strength-{site.path}">  <rect x={xGraphs} width={widthGraph} y={yStrengthGraph} height={heightStrengthGraph} /></clipPath>
+        <clipPath id="clip-direction-{site.path}"> <rect x={xGraphs} width={widthGraph} y={yDirectionGraph} height={heightDirectionGraph} /></clipPath>
         <clipPath id="clip-low-{site.path}">     <rect x={xGraphs} width={widthGraph} y={yLow}       height={hLow} /></clipPath>
         <clipPath id="clip-on-{site.path}">      <rect x={xGraphs} width={widthGraph} y={yOn}        height={hOn} /></clipPath>
         <clipPath id="clip-marginal-{site.path}"><rect x={xGraphs} width={widthGraph} y={yMarginal}  height={hMarginal} /></clipPath>
@@ -326,9 +327,9 @@
     <path fill={colourDanger}      stroke="none" clip-path="url(#clip-danger-{site.path})"   d={windArea} />
 
     <!-- recent lines (average, peak, lull) -->
-    <path fill="none" clip-path="url(#clip-graphs-{site.path})" stroke={colourAvg}  stroke-width={1.5} d={avgLine} />
-    <path fill="none" clip-path="url(#clip-graphs-{site.path})" stroke={colourPeak} stroke-width={1.5} d={recentPeakLine} />
-    <path fill="none" clip-path="url(#clip-graphs-{site.path})" stroke={colourLull} stroke-width={1.5} d={recentLullLine} />
+    <path fill="none" clip-path="url(#clip-strength-{site.path})" stroke={colourAvg}  stroke-width={1.5} d={avgLine} />
+    <path fill="none" clip-path="url(#clip-strength-{site.path})" stroke={colourPeak} stroke-width={1.5} d={recentPeakLine} />
+    <path fill="none" clip-path="url(#clip-strength-{site.path})" stroke={colourLull} stroke-width={1.5} d={recentLullLine} />
 
     <!-- direction graph -->
     <rect fill={colourDirOff} x={xGraphs} y={yDirectionGraph}       width={widthGraph} height={heightDirectionGraph} />
@@ -337,7 +338,7 @@
     {/each}
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
     {#each visibleSamples as sample}
-        <circle clip-path="url(#clip-graphs-{site.path})" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
+        <circle clip-path="url(#clip-direction-{site.path})" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
     {/each}
 </svg>
 {/if}
