@@ -7,19 +7,27 @@
     import type { State } from '$lib/state'
     import { getStateFromSearchParams, updateSearchParamsFromState } from '$lib/state'
 
+    import { ssp, queryParam } from 'sveltekit-search-params'
+
     export let site: Site
     export let searchParams: URLSearchParams
 
     let state: State = getStateFromSearchParams(searchParams)
-    $: updateSearchParamsFromState(searchParams, state)
+    // $: updateSearchParamsFromState(searchParams, state)
+
+    const compact = queryParam('compact', {
+        encode: (value: boolean) => value ? t : undefined,
+        decode: (stringValue: string | null) => stringValue !== null && stringValue !== "false",
+        defaultValue: false
+    })
 </script>
 
 <svelte:head>
     <title>{site.name} Wind Talker</title>
 </svelte:head>
 
-<main class='{state.compact ? "" : "md:m-4 m-1"}'>
-    {#if !state.compact}
+<main class='{$compact ? "" : "md:m-4 m-1"}'>
+    {#if !$compact}
         <Link path="">
             <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>
         </Link>
@@ -32,7 +40,7 @@
 
     <TimeControls bind:state />
     <WindTalkerListing {site} {state} />
-    <CompactLink bind:compact={state.compact} />
+    <CompactLink bind:compact={$compact} />
 </main>
 
 <style>
