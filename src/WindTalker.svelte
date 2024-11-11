@@ -24,7 +24,7 @@
     export let minutesToShow: number
 
     // Settings
-    const margin: Margin = { left: 10, right: 10, top: 23, bottom: 10 }
+    const margin: Margin = { left: 10, right: 10, top: 23, bottom: 19 }
     const widthKt = 20
     const widthKmh = 30
     const yBetweenGraphs = 25
@@ -66,7 +66,7 @@
         return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText)
     }
 
-    $: timeText = date ? formatDate(date) : 'last ' + formatHours(minutesToShow)
+    $: timeText = date ? '' : ': last ' + formatHours(minutesToShow)
 
     let visibility: "visible" | "hidden" = "visible"
     $: visible = visibility == "visible"
@@ -95,9 +95,10 @@
     $: yStrengthGraphBottom = yStrengthGraph + heightStrengthGraph
     $: yDirectionGraph = yStrengthGraphBottom + yBetweenGraphs
     $: heightDirectionGraph = heightGraphs - heightStrengthGraph
+    $: yDirectionGraphBottom = yDirectionGraph + heightDirectionGraph
     $: xRange = [xGraphs, xGraphs + widthGraph]
     $: yStrengthRange = [yStrengthGraphBottom, yStrengthGraph]
-    $: yDirectionRange = [yDirectionGraph, yDirectionGraph + heightDirectionGraph]
+    $: yDirectionRange = [yDirectionGraph, yDirectionGraphBottom]
 
     $: times = visibleSamples.map(s => s.time)
     $: indices = d3Array.range(times.length)
@@ -162,13 +163,11 @@
 
     $: yLow = mphScale(site.speedLowMph)
     $: yOn = mphScale(site.speedOnMph)
-    $: console.log(yOn)
     $: yMarginal = mphScale(site.speedMarginalMph)
     $: yDanger = mphScale(graphMaxMph)
 
     $: hLow = yStrengthGraphBottom - yLow
     $: hOn = yLow - yOn
-    $: console.log(hOn)
     $: hMarginal = yOn - yMarginal
     $: hDanger = yMarginal - yDanger
 
@@ -307,10 +306,8 @@
     <Axis x={xGraphs + widthGraph + widthKmh} y={0} axis={ktAxis} />
     <text x={xGraphs + widthGraph + widthKmh} y={margin.top - 7} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kt</text>
 
-    <text x={xGraphs} y={margin.top - 5} font-size="small">{site.name}: {timeText}</text>
-    {#if !date}
-        <text x={xGraphs + widthGraph - 200} y={margin.top - 5} font-size="small">{formatDateTime(new Date(msNow))}</text>
-    {/if}
+    <text x={xGraphs} y={margin.top - 5} font-size="small">{site.name} {timeText}</text>
+    <text x={xGraphs + widthGraph - 5} y={height - 3} font-size="small" text-anchor="end">{formatDateTime(new Date(msNow))}</text>
 
     <!-- zone backgrounds -->
     <rect x={xGraphs} width={widthGraph} y={yLow}      height={hLow}      fill={colourLowBg} />
