@@ -1,5 +1,4 @@
 <script lang="ts">
-
     export let minutesToShow: number
 
     $: timeText = formatHours(minutesToShow)
@@ -15,7 +14,21 @@
 
 </script>
 
-<div class="w-full p-4">
-    <label class="w-full" for="minutesToShow" id="minutesToShowLabel">Showing {timeText}</label>
+<div class="w-full md:px-4 px-1 pb-0">
+    <label class="w-full font-semibold" for="minutesToShow" id="minutesToShowLabel">Showing {timeText}</label>
     <input class="w-full" bind:value={minutesToShow} type="range" min="10" max="1440" id="minutesToShow" style="direction: rtl;"/>
+    <button class="{minutesToShow == 60 ? 'enabled' : ''}" on:click={() => minutesToShow = 60}>1 hour</button>
+    <button class="{minutesToShow == 4 * 60 ? 'enabled' : ''}" on:click={() => minutesToShow = 4 * 60}>4 hours</button>
+    <button class="{minutesToShow == 12 * 60 ? 'enabled' : ''}" on:click={() => minutesToShow = 12 * 60}>12 hours</button>
+    <button class="{minutesToShow == 24 * 60 ? 'enabled' : ''}" on:click={() => minutesToShow = 24 * 60}>24 hours</button>
 </div>
+
+<style type="text/postcss">
+    button {
+        @apply bg-gray-500 text-white font-bold py-1 px-2 rounded shadow hover:bg-blue-400 text-sm;
+    }
+
+    .enabled {
+        @apply bg-blue-500 shadow-inner
+    }
+</style>

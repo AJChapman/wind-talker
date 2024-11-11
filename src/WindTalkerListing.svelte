@@ -9,11 +9,11 @@
     let graphHeight: number
 </script>
 
-<div class="w-full h-96 p-4 mb-4">
-    <a href="/{site.folder}/">
+<div class="w-full flex flex-col h-80 md:h-96 px-1 md:px-4 my-4">
+    <a class="flex-none" href="/{site.folder}/">
         <h1 class="font-sans text-sky-700 text-xl hover:underline mb-2">{site.name}</h1>
     </a>
-    <div class="w-full h-full border" bind:clientWidth={graphWidth} bind:clientHeight={graphHeight}>
-        <WindTalker site={site} width={graphWidth} height={graphHeight} {minutesToShow} />
+    <div class="grow w-full border" bind:offsetWidth={graphWidth} bind:offsetHeight={graphHeight}>
+        <WindTalker site={site} width={graphWidth} height={graphHeight - 5} {minutesToShow} />
     </div>
 </div>

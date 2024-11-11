@@ -6,7 +6,7 @@
     let minutesToShow: number = 60
 </script>
 
-<main class="m-4">
+<main class="lg:m-4 m-1">
     <a href="/">
         <h1 class="font-sans text-sky-700 text-xl hover:underline">FreeFlightWx.com</h1>
     </a>
