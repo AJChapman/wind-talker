@@ -1,6 +1,6 @@
 <script lang="ts">
     import WindTalkerPage from '$lib/WindTalkerPage.svelte'
-    import { lakegeorge as site } from '$lib/freeflightwx-sites'
+    import { gundowring as site } from '$lib/freeflightwx-sites'
 </script>
 
 <WindTalkerPage {site} />

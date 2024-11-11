@@ -17,7 +17,3 @@ export interface Site {
     altitudeFt: number
     dirAdjust: number
 }
-
-export function sitePath(site: Site): string {
-    return (site.group === undefined) ? site.path : `${site.group.path}/${site.path}`
-}

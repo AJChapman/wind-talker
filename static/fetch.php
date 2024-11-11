@@ -2,9 +2,20 @@
     include 'secrets.php';
 
     $data_tables = array(
-       'acthpa/springhill' => 'spring_hill',
-       'acthpa/lakegeorge' => 'lake_george',
-       'acthpa/lanyon' => 'lanyon'
+       'springhill' => 'spring_hill',
+       'lakegeorge' => 'lake_george',
+       'lanyon' => 'lanyon',
+       'mystic' => 'mystic',
+       'gundowring' => 'gundowring',
+       'emu' => 'emu',
+       'buckland' => 'buckland',
+       'porepunkah' => 'porepunkah',
+       'corryong' => 'corryong',
+       'flowerdale' => 'flowerdale',
+       'mtbroughton' => 'mtbroughton',
+       'pops' => 'pops',
+       'tunk' => 'tunk',
+       'kurutake' => 'kurutake'
     );
 
     if (!array_key_exists($_GET['site'], $data_tables)) {
