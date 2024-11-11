@@ -26,6 +26,7 @@ export const lakegeorge: Site =
                    }]
     , altitudeFt: 2185
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const nevic: SiteGroup =
@@ -47,6 +48,7 @@ export const mystic: Site =
                    }]
     , altitudeFt: 2615
     , dirAdjust: 0
+    , dirOnCentre: 285
     }
 
 gundowring.group = nevic
@@ -74,6 +76,7 @@ export const flowerdale: Site =
                    }]
     , altitudeFt: 1600
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 
@@ -91,6 +94,7 @@ export const mtbroughton: Site =
                    }]
     , altitudeFt: 2100
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const sqld: SiteGroup =
@@ -133,6 +137,7 @@ export const pops: Site =
                    }]
     , altitudeFt: 885
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const tunk: Site =
@@ -149,6 +154,7 @@ export const tunk: Site =
                    }]
     , altitudeFt: 280
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const kuratake: Site =
@@ -165,6 +171,7 @@ export const kuratake: Site =
                    }]
     , altitudeFt: 1493
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 // Unlisted sites
@@ -183,6 +190,7 @@ export const eclipselx: Site =
                    }]
     , altitudeFt: 1845
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const eclipselx2: Site =
@@ -199,6 +207,7 @@ export const eclipselx2: Site =
                    }]
     , altitudeFt: 1845
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const eclipselx3: Site =
@@ -215,6 +224,7 @@ export const eclipselx3: Site =
                    }]
     , altitudeFt: 2615
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 // The auto-generated version of this seems to be wrong at time of writing.
@@ -232,6 +242,7 @@ export const hooleydooley: Site =
                    }]
     , altitudeFt: 1155
     , dirAdjust: 110
+    , dirOnCentre: undefined
     }
 
 export const lakestclaire: Site =
@@ -248,6 +259,7 @@ export const lakestclaire: Site =
                    }]
     , altitudeFt: 2615
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const temp: Site =
@@ -264,6 +276,7 @@ export const temp: Site =
                    }]
     , altitudeFt: 1845
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const test: Site =
@@ -280,6 +293,7 @@ export const test: Site =
                    }]
     , altitudeFt: 2615
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const winton: Site =
@@ -296,6 +310,7 @@ export const winton: Site =
                    }]
     , altitudeFt: 600
     , dirAdjust: -8
+    , dirOnCentre: undefined
     }
 
 export const woodstock: Site =
@@ -312,6 +327,7 @@ export const woodstock: Site =
                    }]
     , altitudeFt: 2615
     , dirAdjust: 0
+    , dirOnCentre: undefined
     }
 
 export const allSites: Array<Site> =
