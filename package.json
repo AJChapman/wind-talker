@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "proxy": "lcp --proxyUrl http://freeflightwx.com",
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
