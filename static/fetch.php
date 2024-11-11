@@ -28,7 +28,7 @@
        'temp' => 'temp',
        'test' => 'test',
        'winton' => 'winton',
-       'woodstock'
+       'woodstock' => 'woodstock'
     );
 
     if (!array_key_exists($_GET['site'], $data_tables)) {

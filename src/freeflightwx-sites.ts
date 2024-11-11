@@ -245,31 +245,6 @@ export const kurutake: Site =
     , dirAdjust: 0
     }
 
-export const allSites: Array<Site> =
-    [ springhill
-    , lakegeorge
-    , lanyon
-    , mystic
-    , gundowring
-    , mtemu
-    , buckland
-    , porepunkah
-    , corryong
-    , flowerdale
-    , mtbroughton
-    , pops
-    , tunk
-    , kurutake
-    ]
-
-function groupSites(group: SiteGroup, sites: Array<Site>): Array<Site> {
-    return sites.filter(site => site.group === group)
-}
-
-export const acthpaSites = groupSites(acthpa, allSites)
-export const nevicSites = groupSites(nevic, allSites)
-export const svicSites = groupSites(svic, allSites)
-
 // Unlisted sites
 
 export const eclipselx: Site =
@@ -448,3 +423,52 @@ export const woodstock: Site =
     , dirAdjust: 0
     }
 
+export const allSites: Array<Site> =
+    [ springhill
+    , lakegeorge
+    , lanyon
+    , mystic
+    , gundowring
+    , mtemu
+    , buckland
+    , porepunkah
+    , corryong
+    , flowerdale
+    , mtbroughton
+    , pops
+    , tunk
+    , kurutake
+    , eclipselx
+    , eclipselx2
+    , eclipselx3
+    , hooleydooley
+    , lakestclaire
+    , softys
+    , stringybark
+    , temp
+    , test
+    , winton
+    , woodstock
+    ]
+
+export function groupSites(group: SiteGroup): Array<Site> {
+    return allSites.filter(site => site.group === group)
+}
+
+export const acthpaSites = groupSites(acthpa)
+export const nevicSites = groupSites(nevic)
+export const svicSites = groupSites(svic)
+
+export const allGroups: Array<SiteGroup> =
+    [ acthpa
+    , nevic
+    , svic
+    ]
+
+export function siteByPath(path: string, sites: Array<Site> = allSites): Site | undefined {
+    return sites.find(site => site.path === path)
+}
+
+export function groupByPath(path: string, groups: Array<SiteGroup> = allGroups): SiteGroup | undefined {
+    return groups.find(group => group.path === path)
+}

@@ -1,6 +1,0 @@
-<script lang="ts">
-    import Group from '$lib/Group.svelte'
-    import { acthpa as group, acthpaSites as sites } from '$lib/freeflightwx-sites'
-</script>
-
-<Group {group} {sites} />

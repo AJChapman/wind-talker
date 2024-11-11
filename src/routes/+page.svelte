@@ -2,6 +2,10 @@
     import Link from '$lib/Link.svelte'
     import { acthpa, acthpaSites, nevic, nevicSites, svic, svicSites, pops, tunk, kurutake } from '$lib/freeflightwx-sites'
     import GroupListing from '$lib/GroupListing.svelte'
+
+    import type { LayoutData } from './$types'
+    export let data: LayoutData
+    $: console.log(data)
 </script>
 
 <main class="md:m-4 m-1 flex items-center justify-center">
