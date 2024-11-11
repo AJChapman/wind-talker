@@ -4,8 +4,6 @@
     import CompactLink from '$lib/CompactLink.svelte'
     import type { Site } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
-    import { clampMinutesToShow } from './settings'
-    import { settings } from '$lib/settings'
     import type { State } from '$lib/state'
     import { getStateFromSearchParams, updateSearchParamsFromState } from '$lib/state'
 
@@ -14,17 +12,14 @@
 
     let state: State = getStateFromSearchParams(searchParams)
     $: updateSearchParamsFromState(searchParams, state)
-
-    let minutesToShow: number
-    let compact: boolean
 </script>
 
 <svelte:head>
     <title>{site.name} Wind Talker</title>
 </svelte:head>
 
-<main class="{compact ? "" : "md:m-4 m-1"}">
-    {#if !compact}
+<main class='{state.compact ? "" : "md:m-4 m-1"}'>
+    {#if !state.compact}
         <Link path="">
             <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>
         </Link>
@@ -37,7 +32,7 @@
 
     <TimeControls bind:state />
     <WindTalkerListing {site} {state} />
-    <CompactLink bind:compact />
+    <CompactLink bind:compact={state.compact} />
 </main>
 
 <style>
