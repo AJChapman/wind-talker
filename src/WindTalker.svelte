@@ -6,13 +6,15 @@
 
     import { onMount, tick } from 'svelte'
     import VisibilityChange from 'svelte-visibility-change'
+    import debounce from 'lodash.debounce'
 
     import type { Site } from './site'
     import { fetchSamples } from './freeflightwx-fetch'
+    import { sampleIntervalSecs } from './freeflightwx-db'
     import type { Sample } from './sample'
     import Axis from './Axis.svelte'
     import type { Margin } from './margin'
-    import { mphToKt, mphToKmh, minutesToMs, msToSamples, secondsToSamples } from './conversion'
+    import { mphToKt, mphToKmh, minutesToMs, msToSamples, secondsToSamples, secondsToMs } from './conversion'
 
     // Component parameters
     export let site: Site
@@ -64,12 +66,11 @@
     let msNow: number = Date.now()
     $: msEarliestLoadedSample = (loadedSamples.length > 0) ? loadedSamples[0].time.getTime() : msNow
     $: msLastLoadedSample = (lastLoadedSample !== undefined) ? lastLoadedSample.time.getTime() : (msNow - msToShow)
-    $: msMissing = msNow - msLastLoadedSample
-    $: samplesMissing = msToSamples(msMissing)
     $: msEarliestToShow = msNow - msToShow
+    $: msEarliestToLoad = msEarliestToShow - secondsToMs(sampleIntervalSecs)
 
     let visibleSamples: Array<Sample> = new Array()
-    $: visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= msEarliestToShow)
+    $: visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= msEarliestToLoad)
 
     const xGraphs: number = margin.left
     const yStrengthGraph = margin.top
@@ -201,47 +202,70 @@
         return msLocal - msLocalTimeOffset
     }
 
-    //function msServerToLocal(msServer: number): number {
-    //    return msServer + msLocalTimeOffset
-    //}
+    // Trigger getMissingSamples() whenever msToShow changes.
+    // We deliberately don't depend on msEarliestToShow, because this is changed by msNow,
+    // which changes much more frequently.
+    $: requestMissingSamples(msToShow)
 
-    async function getLatestSamples() {
-        msNow = msLocalToServer(Date.now())
+    // Debounce getting missing samples so we don't spam the server too much
+    const requestMissingSamples = debounce(((ms: number) => getMissingSamples()), 200, { leading: true, maxWait: 500, trailing: true })
 
-        if (samplesMissing > 0) {
-            const newSamples = await fetchSamples(site, msLastLoadedSample)
-            addSamples(newSamples)
-        }
-    }
-
-    // Trigger getMissingSamples() whenever msToShow changes
-    async function getMissingSamples() {
-        const msBeforeLoaded = msEarliestLoadedSample - msEarliestToShow
+    function getMissingSamples() {
+        const msBeforeLoaded = msEarliestLoadedSample - msEarliestToLoad
         if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {
-            const newSamples = await fetchSamples(site, msEarliestToShow, msEarliestLoadedSample)
-            addSamples(newSamples)
+            pauseUpdates()
+            fetchSamples(site, msEarliestToLoad, msEarliestLoadedSample).then(newSamples => addSamples(newSamples))
+            resumeUpdates()
         }
     }
 
-    let updateTimeout: string | number | NodeJS.Timeout | null = null;
+    // This type is odd... but it typechecks :/
+    let updateTimeout: string | number | NodeJS.Timeout | undefined
+
+    function pauseUpdates() {
+        if (updateTimeout !== undefined) {
+            clearTimeout(updateTimeout)
+            updateTimeout = undefined
+        }
+    }
+
+    function resumeUpdates() {
+        // Wait for any newly fetched samples to be registered before starting/resuming updates
+        tick().then(() => {
+            if (updateTimeout === undefined) {
+                updateTimeout = setTimeout(update, refreshIntervalMs)
+            }
+        })
+    }
 
     $: refreshIntervalMs = visible ? visibleRefreshMs : hiddenRefreshMs
 
-    $: {
-        // Change the timeout when refreshIntervalMs changes
-        clearTimeout(updateTimeout)
-        updateTimeout = setTimeout(update, refreshIntervalMs)
+    $: changeTimeout(refreshIntervalMs)
+
+    function changeTimeout(refreshIntervalMs: number) {
+        // Change the timeout when refreshIntervalMs changes (unless the timer wasn't running)
+        if (updateTimeout !== undefined) {
+            clearTimeout(updateTimeout)
+            updateTimeout = setTimeout(update, refreshIntervalMs)
+        }
     }
 
-    onMount(() => update())
+    // onMount(() => update())
 
-    async function update(): Promise<void> {
-        clearTimeout(updateTimeout)
-        getLatestSamples()
-        await tick()
-        getMissingSamples()
-        await tick()
-        updateTimeout = setTimeout(update, refreshIntervalMs)
+    function update(): void {
+        pauseUpdates()
+
+        // Update when we consider 'now' to be.
+        // We don't do this continuously because this would produce too much busy-work.
+        // Instead we do it at the update interval (visibleRefreshMs when the window is visible).
+        msNow = msLocalToServer(Date.now())
+
+        const samplesMissing = msToSamples(msNow - msLastLoadedSample)
+        if (samplesMissing > 0) {
+            fetchSamples(site, msLastLoadedSample).then(newSamples => addSamples(newSamples))
+        }
+
+        resumeUpdates()
     }
 </script>
 
@@ -257,6 +281,9 @@
     <text x={xGraphs + widthGraph + widthKmh} y={margin.top - 10} fill="currentColor" text-anchor="start" font-weight="bold" font-size="x-small">kt</text>
 
     <!-- clip paths -->
+    <clipPath id="clip-graphs">
+        <rect x={xGraphs} y={0} width={widthGraph} height={height} />
+    </clipPath>
     <clipPath id="clip-low">
         <rect x={xGraphs} y={mphScale(site.speedLowMph)} width={widthGraph} height={mphScale(0) - mphScale(site.speedLowMph)} />
     </clipPath>
@@ -287,13 +314,13 @@
     <path fill={colourDanger} stroke="none" clip-path="url(#clip-danger)" d={windArea} />
 
     <!-- recent lines (average, peak, lull) -->
-    <path fill="none" stroke={colourAvg} stroke-width={1.5} d={avgLine} />
-    <path fill="none" stroke={colourPeak} stroke-width={1.5} d={recentPeakLine} />
-    <path fill="none" stroke={colourLull} stroke-width={1.5} d={recentLullLine} />
+    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourAvg} stroke-width={1.5} d={avgLine} />
+    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourPeak} stroke-width={1.5} d={recentPeakLine} />
+    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourLull} stroke-width={1.5} d={recentLullLine} />
 
     <!-- direction graph -->
     <rect fill={colourDirOff} x={xGraphs} y={yDirectionGraph}       width={widthGraph} height={heightDirectionGraph} />
     <rect fill={colourDirOn}  x={xGraphs} y={dirScale(dirStartDeg)} width={widthGraph} height={dirScale(dirEndDeg) - dirScale(dirStartDeg)} />
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
-    <path fill="none" stroke={colourDir} stroke-width={1.5} d={dirLine} />
+    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourDir} stroke-width={1.5} d={dirLine} />
 </svg>

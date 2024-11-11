@@ -13,6 +13,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.2",
     "@tsconfig/svelte": "^3.0.0",
+    "@types/lodash.debounce": "^4.0.7",
     "svelte": "^3.49.0",
     "svelte-check": "^2.8.1",
     "svelte-preprocess": "^4.10.7",
@@ -35,6 +36,7 @@
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.1.0",
+    "lodash.debounce": "^4.0.8",
     "postcss": "^8.4.18",
     "safety-match": "^0.4.4",
     "svelte-visibility-change": "^0.6.0",
