@@ -2,8 +2,8 @@ import type { PageLoad } from './$types'
 
 export const load: PageLoad = ({ params, url }) => {
     return {
-        siteOrGroup: params.siteOrGroup,
-        searchParams: url.searchParams
+      siteOrGroup: params.siteOrGroup,
+      url: url,
     };
 }
 

@@ -1,52 +1,28 @@
-import debounce from 'lodash.debounce'
-
 import { settings, clampMinutesToShow } from './settings'
-import { minutesIn24Hours } from './date'
 import { endOfDate, formatISODate } from './date'
-import { setSearchParam,  setSearchParams, setSearchParamToggle } from './search-params'
+import { queryParam, flagCodec } from './search-params'
+import type { Writable } from 'svelte/store'
 
-export interface State {
-    date: Date | null
-    minutesToShow: number
-}
-
-export function getStateFromSearchParams(searchParams: URLSearchParams): State {
-    const date = getDateFromURLSearchParams(searchParams)
-    let minutesToShow = clampMinutesToShow(getMinutesToShowFromURLSearchParams(searchParams))
-    if (date !== null) {
-        // If showing a particular date then show 24 hours
-        minutesToShow = minutesIn24Hours
-    }
-
-    return { date: date
-           , minutesToShow: minutesToShow
-           }
-}
-
-function getDateFromURLSearchParams(searchParams: URLSearchParams): Date | null {
-    const d = searchParams.get('date')
-    if (d === undefined || d === null) return null
-    const dateMs = Date.parse(d)
-    if (isNaN(dateMs)) return null
+export const date: Writable<Date | null> = queryParam('date', null, {
+  encode: (d: Date | null) => (d === null ? undefined : formatISODate(d)),
+  decode: (s: string): Date | undefined => {
+    const dateMs = Date.parse(s)
+    if (isNaN(dateMs)) return undefined
     return endOfDate(new Date(dateMs))
-}
+  }
+})
 
-function getMinutesToShowFromURLSearchParams(searchParams: URLSearchParams): number {
-    const m = searchParams.get('minutesToShow')
-    if (m === undefined || m === null) return settings.minutesToShowDefault
-    return parseInt(m)
-}
-
-export const updateSearchParamsFromState = debounce(setSearchParamsFromState, 1000, { leading: false, maxWait: 20000, trailing: true })
-function setSearchParamsFromState(searchParams: URLSearchParams, state: State): void {
-    const oldSearchString = searchParams.toString()
-    if (state.date === null) {
-        setSearchParam(searchParams, 'date', undefined)
-        setSearchParam(searchParams, 'minutesToShow', state.minutesToShow === settings.minutesToShowDefault ? undefined : state.minutesToShow.toString())
-    } else {
-        setSearchParam(searchParams, 'date', formatISODate(state.date))
-        setSearchParam(searchParams, 'minutesToShow', undefined)
+export const minutesToShow: Writable<number> = queryParam(
+  'minutesToShow',
+  settings.minutesToShowDefault,
+  {
+    encode: (n: number) => n.toString(),
+    decode: (s: string): number | undefined => {
+      const n = parseFloat(s)
+      return isNaN(n) ? undefined : clampMinutesToShow(n)
     }
-    const newSearchString = searchParams.toString()
-    if (newSearchString !== oldSearchString) setSearchParams(searchParams)
-}
+  },
+  { debounceHistory: 1500 }
+)
+
+export const compact: Writable<boolean> = queryParam('compact', false, flagCodec())

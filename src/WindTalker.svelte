@@ -14,14 +14,13 @@
     import Axis from './Axis.svelte'
     import type { Margin } from './margin'
     import { mphToKt, mphToKmh, minutesToMs, msToSamples, secondsToSamples, secondsToMs } from './conversion'
-    import { formatDate, formatDateTime } from './date'
+    import { formatDateTime } from './date'
+    import { date, minutesToShow } from './state'
 
     // Component parameters
     export let site: Site
     export let width: number
     export let height: number
-    export let date: Date | null
-    export let minutesToShow: number
 
     // Settings
     const margin: Margin = { left: 10, right: 10, top: 23, bottom: 19 }
@@ -66,12 +65,14 @@
         return hourNumber + " hours" + (minutesText == "" ? "" : ", " + minutesText)
     }
 
-    $: timeText = date ? '' : ': last ' + formatHours(minutesToShow)
+    $: timeText = ($date !== null) ? '' : ': last ' + formatHours($minutesToShow)
 
     let visibility: "visible" | "hidden" = "visible"
     $: visible = visibility == "visible"
 
-    $: msToShow = minutesToMs(minutesToShow)
+    $: console.log(`minutes to show: ${$minutesToShow}`)
+
+    $: msToShow = minutesToMs($minutesToShow)
 
     let loadedSamples: Array<Sample> = new Array()
     $: lastLoadedSample = (loadedSamples.length > 0) ? loadedSamples[loadedSamples.length - 1] : undefined
@@ -218,9 +219,9 @@
     $: refreshIntervalMs = visible ? visibleRefreshMs : hiddenRefreshMs
 
     // Debounce getting missing samples so we don't spam the server too much
-    $: requestUpdate = debounce(((ms: number) => update()), refreshIntervalMs, { leading: true, maxWait: refreshIntervalMs, trailing: true })
+    $: requestUpdate = debounce(((_ms: number) => update()), refreshIntervalMs, { leading: true, maxWait: refreshIntervalMs, trailing: true })
 
-    let timer: NodeJS.Timer | undefined
+    let timer: number | undefined
     onMount(() => startUpdates())
     onDestroy(() => stopUpdates())
 
@@ -236,8 +237,8 @@
     $: {
         loadedSamples = new Array()
         visibleSamples = new Array()
-        if (date) {
-            msNow = date.getTime()
+        if ($date !== null) {
+            msNow = $date.getTime()
         } else {
             msNow = Date.now()
         }
@@ -248,7 +249,7 @@
         // We don't do this continuously because this would produce too much busy-work.
         // Instead we do it at the update interval (visibleRefreshMs when the window is visible).
         // We also don't update when a different date has been picked.
-        if (!date) {
+        if ($date === null) {
             msNow = Date.now()
         }
     }
@@ -260,7 +261,9 @@
     async function update(): Promise<void> {
         if (updating) return
         updating = true
+        //console.log(loadedSamples.length > 0 ? loadedSamples[0] : "loaded samples empty")
         const msEarliestLoadedSample = (loadedSamples.length > 0) ? loadedSamples[0].time.getTime() : msNow
+        //console.log(msEarliestLoadedSample)
         const msLatestToLoad = Math.min(msNow, msEarliestLoadedSample)
         const msBeforeLoaded = msLatestToLoad - msEarliestToLoad
         if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {

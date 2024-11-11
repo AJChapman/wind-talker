@@ -4,22 +4,9 @@
     import CompactLink from '$lib/CompactLink.svelte'
     import type { Site } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
-    import type { State } from '$lib/state'
-    import { getStateFromSearchParams, updateSearchParamsFromState } from '$lib/state'
-
-    import { ssp, queryParam } from 'sveltekit-search-params'
+    import { compact } from '$lib/state'
 
     export let site: Site
-    export let searchParams: URLSearchParams
-
-    let state: State = getStateFromSearchParams(searchParams)
-    // $: updateSearchParamsFromState(searchParams, state)
-
-    const compact = queryParam('compact', {
-        encode: (value: boolean) => value ? t : undefined,
-        decode: (stringValue: string | null) => stringValue !== null && stringValue !== "false",
-        defaultValue: false
-    })
 </script>
 
 <svelte:head>
@@ -38,9 +25,9 @@
         {/if}
     {/if}
 
-    <TimeControls bind:state />
-    <WindTalkerListing {site} {state} />
-    <CompactLink bind:compact={$compact} />
+    <TimeControls />
+    <WindTalkerListing {site} />
+    <CompactLink />
 </main>
 
 <style>

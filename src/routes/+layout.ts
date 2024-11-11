@@ -3,3 +3,5 @@ export const prerender = true
 
 // Disable server-side rendering so we can access url.searchParams
 export const ssr = false
+
+export const trailingSlash = 'always'
