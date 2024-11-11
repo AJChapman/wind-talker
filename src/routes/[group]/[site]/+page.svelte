@@ -11,7 +11,7 @@
 </script>
 
 {#if site !== undefined}
-    <WindTalkerPage {site} />
+    <WindTalkerPage {site} searchParams={data.searchParams} />
 {/if}
 
 

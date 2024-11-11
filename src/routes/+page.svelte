@@ -4,7 +4,6 @@
     import GroupListing from '$lib/GroupListing.svelte'
 
     import type { PageData } from './$types'
-    export let data: PageData
 </script>
 
 <main class="md:m-4 m-1 flex items-center justify-center">
