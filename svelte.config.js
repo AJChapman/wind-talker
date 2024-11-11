@@ -12,6 +12,7 @@ export default {
         adapter: adapter(),
         files: { lib: 'src' },
         prerender: { entries: [ "*" ] },
-        trailingSlash: 'always'
+        trailingSlash: 'always',
+        paths: { base: '/new' }
     }
 }

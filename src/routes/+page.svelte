@@ -1,12 +1,14 @@
 <script lang="ts">
-    import { base } from '$app/paths'
+    import Link from '$lib/Link.svelte'
 </script>
 
 <main class="md:m-4 m-1">
-    <a href="{base}">
+    <Link path="">
         <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">FreeFlightWx.com</h1>
-    </a>
-    <a href="{base}acthpa">ACTHPA</a>
+    </Link>
+    <Link path="acthpa">
+        <h1 class="font-sans font-medium text-[#337ab7] text-2xl hover:underline">ACTHPA</h1>
+    </Link>
 </main>
 
 <style>
