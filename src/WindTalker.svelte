@@ -20,7 +20,7 @@
     export let site: Site
     export let width: number
     export let height: number
-    export let date: Date | null | undefined
+    export let date: Date | null
     export let minutesToShow: number
 
     // Settings

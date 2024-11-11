@@ -1,10 +1,10 @@
+import { minutesIn24Hours } from './date'
+
 export interface Settings {
     minutesToShowMin: number
     minutesToShowMax: number
     minutesToShowDefault: number
 }
-
-export const minutesIn24Hours: number = 1440
 
 export const settings: Settings =
     { minutesToShowMin: 10
