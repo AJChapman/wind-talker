@@ -89,7 +89,6 @@
 
     $: times = visibleSamples.map(s => s.time)
     $: indices = d3Array.range(times.length)
-    $: directions = visibleSamples.map(s => s.windDirectionDeg)
     $: timeRange = [msEarliestToShow, msNow]
     $: windMph = visibleSamples.map(s => s.windSpeedMph)
     $: windMinMph = visibleSamples.map(s => s.windMinMph)
@@ -164,12 +163,6 @@
         .y0(mphScale(0))
         .y1(i => mphScale(visibleSamples[i].windMinMph))
        (indices)
-
-    $: dirLine = d3Shape.line<number>()
-        .curve(curve)
-        .x(i => xScale(times[i]))
-        .y(i => dirScale(directions[i]))
-        (indices)
 
     $: avgLine = d3Shape.line<number>()
         .curve(curve)
@@ -299,5 +292,7 @@
     <rect fill={colourDirOff} x={xGraphs} y={yDirectionGraph}       width={widthGraph} height={heightDirectionGraph} />
     <rect fill={colourDirOn}  x={xGraphs} y={dirScale(dirStartDeg)} width={widthGraph} height={dirScale(dirEndDeg) - dirScale(dirStartDeg)} />
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
-    <path fill="none" clip-path="url(#clip-graphs)" stroke={colourDir} stroke-width={1.5} d={dirLine} />
+    {#each visibleSamples as sample}
+        <circle clip-path="url(#clip-graphs)" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
+    {/each}
 </svg>
