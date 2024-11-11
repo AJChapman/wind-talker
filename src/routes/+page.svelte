@@ -1,13 +1,14 @@
 <script lang="ts">
-    import WindTalkerListing from './WindTalkerListing.svelte'
-    import { springHill, lakeGeorge, lanyon } from './freeflightwx-sites'
-    import TimeControls from './TimeControls.svelte'
+    import WindTalkerListing from '$lib/WindTalkerListing.svelte'
+    import { springHill, lakeGeorge, lanyon } from '$lib/freeflightwx-sites'
+    import TimeControls from '$lib/TimeControls.svelte'
 
     let minutesToShow: number = 60
 </script>
 
 <svelte:head>
     <link rel="icon" type="image/x-icon" href="{import.meta.env.BASE_URL}favicon.ico">
+    <title>FreeFlight Wx ACTHPA</title>
 </svelte:head>
 
 <main class="md:m-4 m-1">
