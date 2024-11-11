@@ -1,6 +1,8 @@
 <?php
     include 'secrets.php';
 
+    ini_set('zlib.output_compression', 1);
+
     $data_tables = array(
        'springhill' => 'spring_hill',
        'lakegeorge' => 'lake_george',
@@ -56,6 +58,7 @@
         $data[]=$row;
     }
 
+    header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data);
 ?>
