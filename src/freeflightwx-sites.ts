@@ -14,8 +14,9 @@ export const springhill: Site =
     , speedOnMph: 18
     , speedMarginalMph: 22
     , speedMaxMph: 150 // max recordable wind speed to cancel out electrical interference
-    , dirOnDeg: 280
-    , dirWidthDeg: 45
+    , directions: [{ centerDeg: 280
+                   , halfWidthDeg: 45
+                   }]
     , altitudeFt: 2870
     , dirAdjust: 0
     }
@@ -29,8 +30,9 @@ export const lakegeorge: Site =
     , speedOnMph: 15
     , speedMarginalMph: 18
     , speedMaxMph: 150
-    , dirOnDeg: 80
-    , dirWidthDeg: 45
+    , directions: [{ centerDeg: 80
+                   , halfWidthDeg: 45
+                   }]
     , altitudeFt: 2185
     , dirAdjust: 0
     }
@@ -44,8 +46,9 @@ export const lanyon: Site =
     , speedOnMph: 13
     , speedMarginalMph: 20
     , speedMaxMph: 150
-    , dirOnDeg: 280
-    , dirWidthDeg: 45
+    , directions: [{ centerDeg: 280
+                   , halfWidthDeg: 45
+                   }]
     , altitudeFt: 2970
     , dirAdjust: 0
     }
@@ -64,8 +67,9 @@ export const mystic: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2615
     , dirAdjust: 0
     }
@@ -79,8 +83,9 @@ export const gundowring: Site =
     , speedOnMph: 13
     , speedMarginalMph: 16
     , speedMaxMph: 150
-    , dirOnDeg: 285
-    , dirWidthDeg: 50
+    , directions: [{ centerDeg: 285
+                   , halfWidthDeg: 50
+                   }]
     , altitudeFt: 2110
     , dirAdjust: 0
     }
@@ -94,8 +99,9 @@ export const mtemu: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 258.75
-    , dirWidthDeg: 33.75
+    , directions: [{ centerDeg: 258.75
+                   , halfWidthDeg: 33.75
+                   }]
     , altitudeFt: 3200
     , dirAdjust: 0
     }
@@ -109,8 +115,9 @@ export const buckland: Site =
     , speedOnMph: 13
     , speedMarginalMph: 16
     , speedMaxMph: 150
-    , dirOnDeg: 213.75
-    , dirWidthDeg: 33.75
+    , directions: [{ centerDeg: 213.75
+                   , halfWidthDeg: 33.75
+                   }]
     , altitudeFt: 1845
     , dirAdjust: 0
     }
@@ -125,10 +132,13 @@ export const porepunkah: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 13
-    , dirWidthDeg: 30
-    /* , dirOnDeg: 193
-    , dirWidthDeg: 30 */
+    , directions: [ { centerDeg: 13
+                    , halfWidthDeg: 30
+                    }
+                  , { centerDeg: 193
+                    , halfWidthDeg: 30
+                    }
+                  ]
     , altitudeFt: 935
     , dirAdjust: -77
     }
@@ -142,8 +152,9 @@ export const corryong: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 290
-    , dirWidthDeg: 35
+    , directions: [{ centerDeg: 290
+                   , halfWidthDeg: 35
+                   }]
     , altitudeFt: 3010
     , dirAdjust: 0
     }
@@ -162,8 +173,9 @@ export const flowerdale: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 1600
     , dirAdjust: 0
     }
@@ -178,8 +190,9 @@ export const mtbroughton: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 225
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 225
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2100
     , dirAdjust: 0
     }
@@ -193,8 +206,9 @@ export const pops: Site =
     , speedOnMph: 12
     , speedMarginalMph: 18
     , speedMaxMph: 150
-    , dirOnDeg: 22
-    , dirWidthDeg: 45
+    , directions: [{ centerDeg: 22
+                   , halfWidthDeg: 45
+                   }]
     , altitudeFt: 885
     , dirAdjust: 0
     }
@@ -208,8 +222,9 @@ export const tunk: Site =
     , speedOnMph: 17.2
     , speedMarginalMph: 20.7
     , speedMaxMph: 150
-    , dirOnDeg: 180
-    , dirWidthDeg: 30
+    , directions: [{ centerDeg: 180
+                   , halfWidthDeg: 30
+                   }]
     , altitudeFt: 280
     , dirAdjust: 0
     }
@@ -223,8 +238,9 @@ export const kurutake: Site =
     , speedOnMph: 9
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 160
-    , dirWidthDeg: 70
+    , directions: [{ centerDeg: 160
+                   , halfWidthDeg: 70
+                   }]
     , altitudeFt: 1493
     , dirAdjust: 0
     }
@@ -265,8 +281,9 @@ export const eclipselx: Site =
     , speedOnMph: 31
     , speedMarginalMph: 46.6
     , speedMaxMph: 150
-    , dirOnDeg: 0
-    , dirWidthDeg: 1
+    , directions: [{ centerDeg: 0
+                   , halfWidthDeg: 1
+                   }]
     , altitudeFt: 1845
     , dirAdjust: 0
     }
@@ -280,8 +297,9 @@ export const eclipselx2: Site =
     , speedOnMph: 31
     , speedMarginalMph: 46.6
     , speedMaxMph: 150
-    , dirOnDeg: 0
-    , dirWidthDeg: 1
+    , directions: [{ centerDeg: 0
+                   , halfWidthDeg: 1
+                   }]
     , altitudeFt: 1845
     , dirAdjust: 0
     }
@@ -295,8 +313,9 @@ export const eclipselx3: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2615
     , dirAdjust: 0
     }
@@ -310,8 +329,9 @@ export const hooleydooley: Site =
     , speedOnMph: 12
     , speedMarginalMph: 18
     , speedMaxMph: 150
-    , dirOnDeg: 95
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 95
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 1155
     , dirAdjust: 110
     }
@@ -325,8 +345,9 @@ export const lakestclaire: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2615
     , dirAdjust: 0
     }
@@ -340,8 +361,9 @@ export const softys: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2615
     , dirAdjust: 0
     }
@@ -355,8 +377,9 @@ export const stringybark: Site =
     , speedOnMph: 10
     , speedMarginalMph: 15
     , speedMaxMph: 150
-    , dirOnDeg: 90
-    , dirWidthDeg: 90
+    , directions: [{ centerDeg: 90
+                   , halfWidthDeg: 90
+                   }]
     , altitudeFt: 1440
     , dirAdjust: 0
     }
@@ -370,8 +393,9 @@ export const temp: Site =
     , speedOnMph: 13
     , speedMarginalMph: 16
     , speedMaxMph: 150
-    , dirOnDeg: 165
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 165
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 1845
     , dirAdjust: 0
     }
@@ -385,8 +409,9 @@ export const test: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2615
     , dirAdjust: 0
     }
@@ -400,8 +425,9 @@ export const winton: Site =
     , speedOnMph: 13.8
     , speedMarginalMph: 18
     , speedMaxMph: 150
-    , dirOnDeg: 146.25
-    , dirWidthDeg: 33.75
+    , directions: [{ centerDeg: 146.25
+                   , halfWidthDeg: 33.75
+                   }]
     , altitudeFt: 600
     , dirAdjust: -8
     }
@@ -415,8 +441,9 @@ export const woodstock: Site =
     , speedOnMph: 12
     , speedMarginalMph: 14
     , speedMaxMph: 150
-    , dirOnDeg: 350
-    , dirWidthDeg: 40
+    , directions: [{ centerDeg: 350
+                   , halfWidthDeg: 40
+                   }]
     , altitudeFt: 2615
     , dirAdjust: 0
     }

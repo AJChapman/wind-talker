@@ -3,6 +3,11 @@ export interface SiteGroup {
     path: string
 }
 
+export interface SiteDirection {
+    centerDeg: number // The center of the direction band, in degrees
+    halfWidthDeg: number /// Half the width of the direction band, in degrees
+}
+
 export interface Site {
     name: string
     path: string // Relative to group path
@@ -12,8 +17,7 @@ export interface Site {
     speedOnMph: number
     speedMarginalMph: number
     speedMaxMph: number
-    dirOnDeg: number
-    dirWidthDeg: number
+    directions: Array<SiteDirection>
     altitudeFt: number
     dirAdjust: number
 }

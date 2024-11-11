@@ -147,8 +147,8 @@
     $: ktDomain = [0, mphToKt(graphMaxMph)]
     $: kmhDomain = [0, mphToKmh(graphMaxMph)]
     const dirDomain = [0, 359] // degrees
-    $: dirStartDeg = site.dirOnDeg - site.dirWidthDeg
-    $: dirEndDeg = site.dirOnDeg + site.dirWidthDeg
+    $: dirStartDegs = site.directions.map(d => d.centerDeg - d.halfWidthDeg)
+    $: dirEndDegs = site.directions.map(d => d.centerDeg + d.halfWidthDeg)
     $: dirScale = d3Scale.scaleLinear(dirDomain, yDirectionRange)
     $: cardinalScale = d3Scale.scalePoint(["N", "NE", "E", "SE", "S", "SW", "W", "NW", ""], yDirectionRange)
 
@@ -332,7 +332,9 @@
 
     <!-- direction graph -->
     <rect fill={colourDirOff} x={xGraphs} y={yDirectionGraph}       width={widthGraph} height={heightDirectionGraph} />
-    <rect fill={colourDirOn}  x={xGraphs} y={dirScale(dirStartDeg)} width={widthGraph} height={dirScale(dirEndDeg) - dirScale(dirStartDeg)} />
+    {#each dirStartDegs as dirStartDeg, i}
+        <rect fill={colourDirOn}  x={xGraphs} y={dirScale(dirStartDeg)} width={widthGraph} height={dirScale(dirEndDegs[i]) - dirScale(dirStartDeg)} />
+    {/each}
     <Axis x={xGraphs + widthGraph} y={0} axis={cardinalAxis} />
     {#each visibleSamples as sample}
         <circle clip-path="url(#clip-graphs-{site.path})" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
