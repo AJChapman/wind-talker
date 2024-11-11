@@ -12,7 +12,7 @@
     let graphHeight: number
 </script>
 
-<div class="w-full my-{compact ? "2" : "4"}">
+<div class="w-full mt-{compact ? "2" : "4"}">
     {#if !compact}
         <Link path={site.path}>
             <h1 class="font-sans text-[#337ab7] font-medium text-2xl hover:underline mb-2">{site.name}</h1>
