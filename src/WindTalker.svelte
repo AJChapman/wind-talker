@@ -19,6 +19,7 @@
     export let site: Site
     export let width: number
     export let height: number
+    export let date: Date | null | undefined
     export let minutesToShow: number
 
     // Settings
@@ -55,8 +56,6 @@
     const colourDirOff:      string = '#8c4521'
     const colourDir:         string = '#ffff00'
 
-    let doUpdates: boolean = false
-
     let visibility: "visible" | "hidden" = "visible"
     $: visible = visibility == "visible"
 
@@ -66,7 +65,6 @@
     $: lastLoadedSample = (loadedSamples.length > 0) ? loadedSamples[loadedSamples.length - 1] : undefined
 
     let msNow: number = Date.now()
-    $: msEarliestLoadedSample = (loadedSamples.length > 0) ? loadedSamples[0].time.getTime() : msNow
     $: msLastLoadedSample = (lastLoadedSample !== undefined) ? lastLoadedSample.time.getTime() : (msNow - msToShow)
     $: msEarliestToShow = msNow - msToShow
 
@@ -74,7 +72,7 @@
     $: msEarliestToLoad = msEarliestToShow - secondsToMs(recentSecs)
 
     let visibleSamples: Array<Sample> = new Array()
-    $: visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= msEarliestToLoad)
+    $: visibleSamples = d3Array.filter(loadedSamples, d => d.time.getTime() >= msEarliestToLoad && d.time.getTime() <= msNow)
 
     const xGraphs: number = margin.left
     const yStrengthGraph = margin.top
@@ -191,10 +189,8 @@
         loadedSamples = newSamples.filter((x, i, a) => (i == 0) || (x.id != a[i - 1].id))
     }
 
-    // Trigger getMissingSamples() whenever msToShow changes.
-    // We deliberately don't depend on msEarliestToShow, because this is changed by msNow,
-    // which changes much more frequently.
-    $: if (doUpdates) requestUpdate(msToShow)
+    // Trigger getMissingSamples() whenever msToShow or msNow changes.
+    $: requestUpdate(msToShow + msNow)
 
     $: refreshIntervalMs = visible ? visibleRefreshMs : hiddenRefreshMs
 
@@ -202,22 +198,36 @@
     $: requestUpdate = debounce(((ms: number) => update()), refreshIntervalMs, { leading: true, maxWait: refreshIntervalMs, trailing: true })
 
     let timer: NodeJS.Timer | undefined
-    onMount(() => {
-        doUpdates = true
-        timer = setInterval(updateNow, updateNowMs)
-    })
+    onMount(() => startUpdates())
+    onDestroy(() => stopUpdates())
 
-    onDestroy(() => {
-        doUpdates = false
+    function startUpdates(): void {
+        updateNow()
+        timer = setInterval(updateNow, updateNowMs)
+    }
+
+    function stopUpdates(): void {
         clearInterval(timer)
-    })
+    }
+
+    $: {
+        loadedSamples = new Array()
+        visibleSamples = new Array()
+        if (date) {
+            msNow = date.getTime()
+        } else {
+            msNow = Date.now()
+        }
+    }
 
     function updateNow() {
         // Update when we consider 'now' to be.
         // We don't do this continuously because this would produce too much busy-work.
         // Instead we do it at the update interval (visibleRefreshMs when the window is visible).
-        msNow = Date.now()
-        requestUpdate(msToShow)
+        // We also don't update when a different date has been picked.
+        if (!date) {
+            msNow = Date.now()
+        }
     }
 
     // We only allow one update to be running at a time.
@@ -227,10 +237,12 @@
     async function update(): Promise<void> {
         if (updating) return
         updating = true
-        const msBeforeLoaded = msEarliestLoadedSample - msEarliestToLoad
+        const msEarliestLoadedSample = (loadedSamples.length > 0) ? loadedSamples[0].time.getTime() : msNow
+        const msLatestToLoad = Math.min(msNow, msEarliestLoadedSample)
+        const msBeforeLoaded = msLatestToLoad - msEarliestToLoad
         if (msBeforeLoaded > 0 && msToSamples(msBeforeLoaded) > 0) {
             // We need to load samples before the first sample
-            const newSamples = await fetchSamplesBackoff(site, msEarliestToLoad, msEarliestLoadedSample)
+            const newSamples = await fetchSamplesBackoff(site, msEarliestToLoad, msLatestToLoad)
             if (newSamples.length > 0) {
                 addSamples(newSamples)
             }
@@ -251,6 +263,7 @@
 </script>
 
 <VisibilityChange bind:state={visibility} />
+{#if width !== undefined && height !== undefined}
 <svg {width} {height}>
     <!-- time axis -->
     <Axis x={0} y={yStrengthGraphBottom} axis={timeAxis} />
@@ -307,3 +320,4 @@
         <circle clip-path="url(#clip-graphs)" fill={colourDir} stroke={colourDir} cx={xScale(sample.time)} cy={dirScale(sample.windDirectionDeg)} r={1.2} />
     {/each}
 </svg>
+{/if}
