@@ -28,3 +28,5 @@ dist-ssr
 
 # Wind-talker-specific
 static/secrets.php
+freeflightwx.com_public_html
+.direnv/
