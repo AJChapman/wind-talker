@@ -3,9 +3,8 @@
     import { acthpa, acthpaSites, nevic, nevicSites, svic, svicSites, pops, tunk, kurutake } from '$lib/freeflightwx-sites'
     import GroupListing from '$lib/GroupListing.svelte'
 
-    import type { LayoutData } from './$types'
-    export let data: LayoutData
-    $: console.log(data)
+    import type { PageData } from './$types'
+    export let data: PageData
 </script>
 
 <main class="md:m-4 m-1 flex items-center justify-center">

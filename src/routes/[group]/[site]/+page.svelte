@@ -5,11 +5,9 @@
 
     import type { PageData } from './$types'
     export let data: PageData
-    $: console.log(data)
 
     $: group = groupByPath(data.group)
     $: site = (group === undefined) ? undefined : siteByPath(data.site, groupSites(group))
-    $: console.log(site)
 </script>
 
 {#if site !== undefined}
