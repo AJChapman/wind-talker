@@ -28,11 +28,11 @@
 <div class="w-full pb-0 mt-2 {$compact ? "hidden" : ""}">
     <DateInput bind:value={$date} placeholder={"current"} format={"yyyy-MM-dd"} max={endOfDate(new Date(Date.now()))} />
     <input class="w-96 max-w-full" value={sliderScale($minutesToShow)} on:input={e => setCurrent(Math.round(sliderScale.invert(parseInt(e.currentTarget.value))))} type="range" min={sliderRange[0]} max={sliderRange[1]} id="minutesToShow" /><br />
-    <button class="{$minutesToShow == 10 ? 'enabled' : ''}" on:click={() => setCurrent(10)}>10 mins</button>
-    <button class="{$minutesToShow == 60 ? 'enabled' : ''}" on:click={() => setCurrent(60)}>1 hour</button>
-    <button class="{$minutesToShow == 4 * 60 ? 'enabled' : ''}" on:click={() => setCurrent(4 * 60)}>4 hours</button>
-    <button class="{$minutesToShow == 12 * 60 ? 'enabled' : ''}" on:click={() => setCurrent(12 * 60)}>12 hours</button>
-    <button class="{$minutesToShow == 24 * 60 ? 'enabled' : ''}" on:click={() => setCurrent(24 * 60)}>24 hours</button>
+    <button class="{$minutesToShow == 10 ? 'enabled' : ''} hover:bg-blue-400" on:click={() => setCurrent(10)}>10 mins</button>
+    <button class="{$minutesToShow == 60 ? 'enabled' : ''} hover:bg-blue-400" on:click={() => setCurrent(60)}>1 hour</button>
+    <button class="{$minutesToShow == 4 * 60 ? 'enabled' : ''} hover:bg-blue-400" on:click={() => setCurrent(4 * 60)}>4 hours</button>
+    <button class="{$minutesToShow == 12 * 60 ? 'enabled' : ''} hover:bg-blue-400" on:click={() => setCurrent(12 * 60)}>12 hours</button>
+    <button class="{$minutesToShow == 24 * 60 ? 'enabled' : ''} hover:bg-blue-400" on:click={() => setCurrent(24 * 60)}>24 hours</button>
 </div>
 
 <style type="text/postcss">
