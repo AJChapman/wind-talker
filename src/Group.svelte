@@ -2,6 +2,8 @@
     import WindTalkerListing from '$lib/WindTalkerListing.svelte'
     import Link from '$lib/Link.svelte'
     import CompactLink from '$lib/CompactLink.svelte'
+    import TopRight from '$lib/TopRight.svelte'
+    import TableLink from '$lib/TableLink.svelte'
     import type { SiteGroup } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
     import { groupSites } from '$lib/freeflightwx-sites'
@@ -27,5 +29,7 @@
     {#each sites as site}
         <WindTalkerListing {site} />
     {/each}
-    <CompactLink />
+    <TopRight>
+        <TableLink /> | <CompactLink />
+    </TopRight>
 </main>

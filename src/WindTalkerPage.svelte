@@ -2,6 +2,8 @@
     import WindTalkerListing from '$lib/WindTalkerListing.svelte'
     import Link from '$lib/Link.svelte'
     import CompactLink from '$lib/CompactLink.svelte'
+    import TopRight from '$lib/TopRight.svelte'
+    import TableLink from '$lib/TableLink.svelte'
     import type { Site } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
     import { compact } from '$lib/state'
@@ -27,7 +29,9 @@
 
     <TimeControls />
     <WindTalkerListing {site} />
-    <CompactLink />
+    <TopRight>
+        <TableLink /> | <CompactLink />
+    </TopRight>
 </main>
 
 <style>

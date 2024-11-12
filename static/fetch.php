@@ -59,17 +59,21 @@
     $mostMs = 86400000 + 60000;
 
     $sql = '';
+    $fields = 'id, TimeMillis, Winddir, Windspeedmph, WindspeedmphMin, WindspeedmphMax';
+
+    if (isset($_GET["allFields"])) $fields = '*';
+
     if (isset($_GET["toMs"])) {
         // Return samples between fromMs and toMs
         $toMs = intval($_GET["toMs"]);
         $fromMs = min($toMs, max($toMs - $mostMs, intval($_GET["fromMs"])));
         // Return the most recent records if another time isn't requested
-        $sql = sprintf("SELECT id, TimeMillis, Winddir, Windspeedmph, WindspeedmphMin, WindspeedmphMax FROM `%s` WHERE TimeMillis < %d AND TimeMillis >= %d ORDER BY id DESC", $data_table, $toMs, $fromMs);
+        $sql = sprintf("SELECT %s FROM `%s` WHERE TimeMillis < %d AND TimeMillis >= %d ORDER BY id DESC", $fields, $data_table, $toMs, $fromMs);
     } else {
         // No toMs requested, so return the latest data
         $nowMs = time() * 1000;
         $fromMs = max($nowMs - $mostMs, intval($_GET["fromMs"]));
-        $sql = sprintf("SELECT id, TimeMillis, Winddir, Windspeedmph, WindspeedmphMin, WindspeedmphMax FROM `%s` WHERE TimeMillis > %d ORDER BY id DESC", $data_table, $fromMs);
+        $sql = sprintf("SELECT %s FROM `%s` WHERE TimeMillis > %d ORDER BY id DESC", $fields, $data_table, $fromMs);
     }
 
     $result = $mysqli->query($sql);

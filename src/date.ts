@@ -6,7 +6,15 @@ export function formatDate(date: Date): string {
     return dateFormat.format(date)
 }
 
-const dateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, hour: 'numeric', minute: 'numeric', second: 'numeric' }
+const timeOptions: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: 'numeric', second: 'numeric' }
+
+const timeFormat: Intl.DateTimeFormat = new Intl.DateTimeFormat(new Array(), timeOptions)
+
+export function formatTime(date: Date): string {
+    return timeFormat.format(date)
+}
+
+const dateTimeOptions: Intl.DateTimeFormatOptions = { ...dateOptions, ...timeOptions }
 
 const dateTimeFormat: Intl.DateTimeFormat = new Intl.DateTimeFormat(new Array(), dateTimeOptions)
 

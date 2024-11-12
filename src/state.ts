@@ -26,3 +26,5 @@ export const minutesToShow: Writable<number> = queryParam(
 )
 
 export const compact: Writable<boolean> = queryParam('compact', false, flagCodec())
+
+export const table: Writable<boolean> = queryParam('table', false, flagCodec())
