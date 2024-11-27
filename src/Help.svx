@@ -1,0 +1,107 @@
+<script lang="ts">
+    import { showHelp } from '$lib/state'
+</script>
+
+{#if $showHelp}
+<article class="prose w-full max-w-full max-h-96 overflow-y-auto p-2 border bg-amber-100 text-sm">
+FreeFlightWx Weather Stations provide real-time weather information for many flying sites.
+
+## General Advice
+
+These 'wind talkers' should not be used as the only consideration when deciding whether it is safe to fly.
+They are intended to help you decide whether to go to the site at all.
+Once you arrive at a site you should make your decision based on all the information you have available.
+As a pilot you are ultimately responsible for your own safety in this dangerous but glorious sport.
+
+## Reading the Graphs
+
+### The Wind Speed Graph
+
+The top graph shows the wind speed over time.
+The horizontal axis is time, showing the local time at the weather station.
+The vertical axis is wind speed, with the axis showing both km/h (kilometers per hour) and knots (nautical miles).
+
+The speed graph is divided into bands of colour: blue, green, orange and red (in light winds the red won't be visible).
+These indicate the appropriateness of flying a paraglider at this site in this wind speed, although as mentioned above, this should not be your only consideration when deciding whether it is safe for you to fly.
+Blue indicates weak wind: at a ridge soaring site it means you probably won't be able to soar, at a thermic site it may mean a forward launch is needed.
+Green indicates good wind speed: at a ridge soaring site it means it's probably strong enough to soar; at a thermic site it means the wind isn't dangerously strong.
+Orange/yellow indicates that the wind speed is marginal -- inexperienced pilots are advised not to fly; experienced pilots can make their own judgement.
+Red indicates that the wind is probably too strong to fly a regular paraglider.
+
+Note that each of these bands has been chosen to be appropriate to the particular site.
+This means they won't necessarily be the same for each graph!
+In general, soaring sites will have higher speed wind bands than thermic sites.
+
+The 'line' on the speed graph shows the range of wind speed during the given period, with a darker band at the top showing the range of wind speeds during this time.
+
+The brown line is an exponential moving average of the wind speed.
+When ridge soaring it can be thought of as approximating 'cumulative lift' -- if the brown line is in the green band then you can probably stay up, even if the speed occasionally dips into the blue.
+
+The pink line shows the recent peak wind speed at that point in time.
+It takes on the value of the highest maximum wind speed in the 10 minutes prior to that point in time.
+This can be useful when deciding whether to fly after a peak into the red: you may decide not to fly until the pink line is back in the green, which means 10 minutes has past since the last spike beyond the green.
+
+The blue line shows recent lulls in wind speed, over the same 10 minute period as the recent peaks line.
+That is, for any point in time it shows the value of the lowest minimum wind speed in the 10 minutes prior to and including that point in time.
+
+### The Wind Direction Graph
+
+The bottom graph shows wind direction over time.
+The horizontal axis is time, matching the wind speed graph.
+The vertical axis is wind direction, with the site's green band centered.
+The green band (or bands) shows the range of wind directions the site can be flown.
+Wind directions are shown as yellow dots, one for each 11.5 second sample, as in the wind speed graph.
+<!-- TODO: is this an average of the directions over this time? Can we get a range of directions? -->
+
+## The Time Controls
+
+By default the graphs display the last 1 hour, up to the present, but they can be made to show anywhere from 10 minutes to 24 hours, and past days can also be shown.
+As time progresses the graphs will regularly retrieve the latest readings from the wind talkers.
+There are four preset buttons: 10 minutes, 1 hour, 4 hours, 12 hours and 24 hours.
+In addition there is a slider that you can drag to choose a custom duration to display.
+
+Data from days other than the present can be retrieved by selecting the box after the preset buttons, which by default contains 'Auto refresh (3s)'.
+This will open a calendar selector that you can use to choose the date you would like to see.
+Once you choose a date the graph(s) will retrieve and display data for the 24 hours of that date.
+
+## Compact Mode
+
+The graph(s) can be displayed by itself by toggling the 'compact' switch at the top right of the page.
+This removes everything else and just displays the graphs.
+This can be useful for displaying a graph live in a flight instrument, for example.
+To return to the normal view navigate back in your browser.
+
+## Table View
+
+A tabular view of the wind talkers' data can be shown by toggling the 'table' switch at the top right of the page.
+This displays the same information as the graph, sorted by time with the latest readings at the top.
+There are also additional readings available in the table which are not shown in the graph, such as temperature and humidity.
+To return to the graph view toggle the table switch again or navigate back in your browser.
+
+## Help
+
+You have obviously already found the 'help' switch at the top right of the page.
+To hide this help toggle the switch again or navigate back in your browser.
+
+## How it Works
+
+Each weather station measures the wind speed and direction, as well as other variables such as temperature and humidity, and sends the information back to the FreeFlightWx server once every 11.5 seconds.
+The readings are sent by a mobile phone (4G) connection, and the whole station is typically powered by solar and a battery, making each installation stand-alone.
+
+The wind speed is measured and stored in integer values of miles per hour!
+But we report it in the more common units of km/h and knots (nautical miles).
+The average wind speed is actually a vector average, which means that it's possible for it to be less than the minimum wind speed (consider the case where the wind blows from the west for 5.75 seconds, then the same speed from the east for the same period)!
+The graph doesn't show this average, but you can see it in the table view.
+
+## About
+
+Read about the [latest hardware to keep these stations working](https://freeflightwx.com/ffwx4.3.pdf).
+
+Please contact Alistair through [blueflyvario.com](https://www.blueflyvario.com/contact/) for more information.
+
+This web frontend was developed by Alex Chapman.
+The source code is available [on GitHub](https://github.com/AJChapman/wind-talker).
+Contributions in the form of suggestions, bug reports, or pull requests are welcome!
+
+</article>
+{/if}
