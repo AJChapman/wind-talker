@@ -69,6 +69,11 @@ export function stringCodec(): Codec<string> {
     }
 }
 
+// Replace e.g. 'compact=' with 'compact'
+export function tidyQueryString(qs: string): string {
+    return qs.replace(/=(?=&|$)/gm, '')
+}
+
 // Each separate queryParam affects a global object: the URL search parameters.
 // So we keep a global set of updates to search parameter values, where a value
 // of 'undefined' means delete that parameter if present.
@@ -105,12 +110,11 @@ export function queryParam<T>(
             // If the query string would now be changed then change it
             const newQueryString = query.toString()
             if (newQueryString !== oldQueryString) {
-                // Replace e.g. 'compact=' with 'compact'
-                const queryString = `?${newQueryString.replace(/=(?=&|$)/gm, '')}${hash}`
+                const queryString = tidyQueryString(newQueryString);
 
                 // Change the URL
                 // Push a new history item (if 'pushHistory')
-                await goto(queryString, { keepFocus: true, noScroll: true, replaceState: !pushHistory })
+                await goto('?' + queryString + hash, { keepFocus: true, noScroll: true, replaceState: !pushHistory })
                 searchParamValueUpdates.clear()
             }
         }, debounceHistory) // If this is 0 then this runs more-or-less straight away
