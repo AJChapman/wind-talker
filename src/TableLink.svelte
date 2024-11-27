@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { compact, table } from "$lib/state"
+    import { compact, table } from '$lib/state'
+    import Toggle from '$lib/Toggle.svelte'
 </script>
 
 {#if !$compact}
-    <label for="table" class="text-[#337ab7] hover:underline">{#if $table}graph{:else}table{/if}</label>
+    <Toggle label="table" bind:state={$table} />
 {/if}
-    <input id="table" class="hidden" type="checkbox" bind:checked={$table} />
 

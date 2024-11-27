@@ -4,6 +4,8 @@
     import CompactLink from '$lib/CompactLink.svelte'
     import TopRight from '$lib/TopRight.svelte'
     import TableLink from '$lib/TableLink.svelte'
+    import HelpLink from '$lib/HelpLink.svelte'
+    import Help from '$lib/Help.svx'
     import type { Site } from '$lib/site'
     import TimeControls from '$lib/TimeControls.svelte'
     import { compact } from '$lib/state'
@@ -28,9 +30,10 @@
     {/if}
 
     <TimeControls />
+    <Help />
     <WindTalkerListing {site} />
     <TopRight>
-        <TableLink /> | <CompactLink />
+        <TableLink /> <CompactLink /> <HelpLink />
     </TopRight>
 </main>
 

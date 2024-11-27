@@ -1,8 +1,8 @@
 <script lang="ts">
     import { compact } from "$lib/state"
+    import Toggle from '$lib/Toggle.svelte'
 </script>
 
 {#if !$compact}
-    <label for="compact" class="text-[#337ab7] hover:underline">compact</label>
+    <Toggle label="compact" bind:state={$compact} />
 {/if}
-<input id="compact" class="hidden" type="checkbox" bind:checked={$compact} />
